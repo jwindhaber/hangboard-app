@@ -4,6 +4,22 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
+apply plugin: 'idea'
+
+
+idea {
+    module {
+        // if you hate browsing Javadoc
+        downloadJavadoc = false
+
+        // and love reading sources :)
+        downloadSources = true
+    }
+}
+
+
 android {
     compileSdkVersion 28
     buildToolsVersion "29.0.0"
@@ -36,4 +52,43 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    //ROOM libraries
+    def room_version = "2.1.0-rc01"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version" // For Kotlin use kapt instead of annotationProcessor
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
+    // optional - RxJava support for Room
+    implementation "androidx.room:room-rxjava2:$room_version"
+    // optional - Guava support for Room, including Optional and ListenableFuture
+    implementation "androidx.room:room-guava:$room_version"
+    // Test helpers
+    testImplementation "androidx.room:room-testing:$room_version"
+
+
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    // Litho libraries
+    implementation 'com.facebook.litho:litho-core:0.26.1'
+    implementation 'com.facebook.litho:litho-widget:0.26.1'
+
+    kapt 'com.facebook.litho:litho-processor:0.26.1'
+
+    // SoLoader
+    implementation 'com.facebook.soloader:soloader:0.6.0'
+
+    // For integration with Fresco
+    implementation 'com.facebook.litho:litho-fresco:0.26.1'
+
+    // For testing
+    testImplementation 'com.facebook.litho:litho-testing:0.26.1'
+
+    // Sections
+    implementation 'com.facebook.litho:litho-sections-core:0.26.1'
+    implementation 'com.facebook.litho:litho-sections-widget:0.26.1'
+    compileOnly 'com.facebook.litho:litho-sections-annotations:0.26.1'
+
+    kapt 'com.facebook.litho:litho-sections-processor:0.26.1'
+
 }

@@ -1,31 +1,34 @@
 package com.example.hangboard
 
 import android.os.Bundle
-import android.os.CountDownTimer
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import com.example.hangboard.components.HomeComponent
+import com.example.hangboard.components.HomeComponentSpec
+import com.example.hangboard.components.TimerItem
+import com.example.hangboard.components.history.HistoryListSection
 import com.example.hangboard.timeline.Timeline
 import com.example.hangboard.timeline.TimelineFragment
-import com.example.hangboard.timer.HangboardTimer
-import com.example.hangboard.workout.definition.FragmentIdentifier
-import com.example.hangboard.workout.definition.FragmentIdentifier.*
+import com.example.hangboard.workout.definition.FragmentIdentifier.REST
+import com.example.hangboard.workout.definition.FragmentIdentifier.WORK
+import com.facebook.litho.ComponentContext
+import com.facebook.litho.LithoView
+import com.facebook.litho.sections.SectionContext
+import com.facebook.litho.sections.widget.RecyclerCollectionComponent
 
-import kotlinx.android.synthetic.main.activity_main.*
-import java.time.Duration
-import java.time.Duration.ofSeconds
 
 class MainActivity : AppCompatActivity() {
 
 
+    private var root: LithoView? = null
+    private var homeComponent: HomeComponent? = null
+
+    private val TAG = "MainActivity"
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
 
         val timeline = Timeline(
             listOf(
@@ -38,33 +41,51 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-        val hangboardTimer = HangboardTimer(
-            timeline = timeline,
-            timerText = findViewById(R.id.timer_text),
-            timerInfo = findViewById(R.id.timer_info),
-            startButton = findViewById(R.id.start_button))
 
-        hangboardTimer.init()
+        val context = ComponentContext(this)
 
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+        val timerComponent = TimerItem.create(context).timeline(timeline).build()
+
+        val historyComponent = RecyclerCollectionComponent.create(context)
+                .disablePTR(true)
+                .section(HistoryListSection.create(SectionContext(context)).build())
+                .build()
+
+        val listener = object : HomeComponentSpec.HomeComponentClickListener {
+            override fun onHangboardClick() {
+                root?.setComponentAsync(timerComponent)
+            }
+
+            override fun onHistoryClick() {
+                root?.setComponentAsync(historyComponent)
+            }
         }
+
+
+
+        homeComponent = HomeComponent.create(context).listener(listener).build()
+        root = LithoView.create(this, homeComponent)
+        setContentView(root)
     }
 
 
+    override fun onBackPressed() {
+        root?.setComponentAsync(homeComponent)
+//        super.onBackPressed()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
+// Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when(item.itemId) {
+// Handle action bar item clicks here. The action bar will
+// automatically handle clicks on the Home/Up button, so long
+// as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
