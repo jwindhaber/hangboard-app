@@ -8,10 +8,13 @@ import com.example.hangboard.components.HomeComponent
 import com.example.hangboard.components.HomeComponentSpec
 import com.example.hangboard.components.TimerItem
 import com.example.hangboard.components.history.HistoryListSection
+import com.example.hangboard.components.workout.ExpandableWorkoutItem
+import com.example.hangboard.components.workout.WorkoutItemSection
 import com.example.hangboard.timeline.Timeline
 import com.example.hangboard.timeline.TimelineFragment
 import com.example.hangboard.workout.definition.FragmentIdentifier.REST
 import com.example.hangboard.workout.definition.FragmentIdentifier.WORK
+import com.example.hangboard.workout.util.WorkoutProvider
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
@@ -47,10 +50,11 @@ class MainActivity : AppCompatActivity() {
 
         val timerComponent = TimerItem.create(context).timeline(timeline).build()
 
+
         val historyComponent = RecyclerCollectionComponent.create(context)
-                .disablePTR(true)
-                .section(HistoryListSection.create(SectionContext(context)).build())
-                .build()
+            .disablePTR(true)
+            .section(HistoryListSection.create(SectionContext(context)).build())
+            .build()
 
         val listener = object : HomeComponentSpec.HomeComponentClickListener {
             override fun onHangboardClick() {
@@ -64,8 +68,18 @@ class MainActivity : AppCompatActivity() {
 
 
 
+        val workoutItem = RecyclerCollectionComponent.create(context)
+            .disablePTR(true)
+            .section(WorkoutItemSection.create(SectionContext(context)).workout(WorkoutProvider.getWorkout()).build())
+            .build()
+
+        val expandableWorkoutItem = ExpandableWorkoutItem.create(context).initialWorkout(WorkoutProvider.getWorkout()).build()
+
         homeComponent = HomeComponent.create(context).listener(listener).build()
-        root = LithoView.create(this, homeComponent)
+//        root = LithoView.create(this, homeComponent)
+        root = LithoView.create(this,  expandableWorkoutItem)
+
+
         setContentView(root)
     }
 
