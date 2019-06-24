@@ -2,4 +2,4 @@ package com.example.hangboard.workout.dto
 
 
 
-data class WorkUnit(val name: String, val work: Long, val rest: Long = 0L)
+data class WorkUnit(val name: String, var work: Int, var rest: Int = 0)
