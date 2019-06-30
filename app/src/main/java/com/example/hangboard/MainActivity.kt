@@ -9,11 +9,6 @@ import com.example.hangboard.components.HomeComponentSpec
 import com.example.hangboard.components.TimerItem
 import com.example.hangboard.components.history.HistoryListSection
 import com.example.hangboard.components.workout.ExpandableWorkoutItem
-import com.example.hangboard.components.workout.WorkoutItemSection
-import com.example.hangboard.timeline.Timeline
-import com.example.hangboard.timeline.TimelineFragment
-import com.example.hangboard.workout.definition.FragmentIdentifier.REST
-import com.example.hangboard.workout.definition.FragmentIdentifier.WORK
 import com.example.hangboard.workout.util.WorkoutProvider
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.LithoView
@@ -33,30 +28,38 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val timeline = Timeline(
-            listOf(
-                TimelineFragment(7, WORK),
-                TimelineFragment(3, REST),
-                TimelineFragment(7, WORK),
-                TimelineFragment(3, REST),
-                TimelineFragment(7, WORK),
-                TimelineFragment(180, REST)
-            )
-        )
-
-
         val context = ComponentContext(this)
 
 
-        val timerComponent = TimerItem.create(context).timeline(timeline).build()
+//        val createWorkoutItem = RecyclerCollectionComponent.create(context)
+//            .disablePTR(true)
+//            .section(WorkoutItemSection.create(SectionContext(context)).workout(WorkoutProvider.getWorkout()).build())
+//            .build()
+//        val beepList = RecyclerCollectionComponent.create(context)
+//            .disablePTR(true)
+//            .section(BeepList.create(SectionContext(context)).build())
+//            .build()
+//
+//
+//        val customBeep = CustomBeep.create(context).build()
 
+        val createWorkoutItem = ExpandableWorkoutItem.create(context).initialWorkout(WorkoutProvider.getWorkout()).build()
+
+
+        val timerComponent = TimerItem.create(context).timeline(WorkoutProvider.workoutToTimeline(WorkoutProvider.getWorkout())).build()
 
         val historyComponent = RecyclerCollectionComponent.create(context)
             .disablePTR(true)
             .section(HistoryListSection.create(SectionContext(context)).build())
             .build()
 
+
         val listener = object : HomeComponentSpec.HomeComponentClickListener {
+
+            override fun onClickCreateWorkout() {
+                root?.setComponentAsync(createWorkoutItem)
+            }
+
             override fun onHangboardClick() {
                 root?.setComponentAsync(timerComponent)
             }
@@ -64,22 +67,11 @@ class MainActivity : AppCompatActivity() {
             override fun onHistoryClick() {
                 root?.setComponentAsync(historyComponent)
             }
+
         }
 
-
-
-        val workoutItem = RecyclerCollectionComponent.create(context)
-            .disablePTR(true)
-            .section(WorkoutItemSection.create(SectionContext(context)).workout(WorkoutProvider.getWorkout()).build())
-            .build()
-
-        val expandableWorkoutItem = ExpandableWorkoutItem.create(context).initialWorkout(WorkoutProvider.getWorkout()).build()
-
         homeComponent = HomeComponent.create(context).listener(listener).build()
-//        root = LithoView.create(this, homeComponent)
-        root = LithoView.create(this,  expandableWorkoutItem)
-
-
+        root = LithoView.create(this,  homeComponent)
         setContentView(root)
     }
 

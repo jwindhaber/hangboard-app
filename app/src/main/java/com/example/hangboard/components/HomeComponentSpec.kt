@@ -65,6 +65,27 @@ object HomeComponentSpec {
             )
             .child(
                 Row.create(c)
+                    .widthDip(350f)
+                    .heightDip(70f)
+                    .alignItems(YogaAlign.CENTER)
+//                    .alignContent(YogaAlign.FLEX_START)
+                    .positionDip(YogaEdge.ALL, NaN)
+                    .backgroundColor(TomorrowNightStyle.Selection.color)
+                    .marginDip(YogaEdge.BOTTOM, 15f)
+                    .clickHandler(HomeComponent.onClickCreateWorkout(c))
+                    .child(
+                        Text.create(c)
+                            .text("Create Workout")
+                            .textSizeDip(24f)
+                            .textColor(TomorrowNightStyle.Blue.color)
+                            .textSizeSp(24f)
+                            .textAlignment(Layout.Alignment.ALIGN_CENTER)
+                            .alignSelf(YogaAlign.STRETCH)
+                            .paddingDip(YogaEdge.ALL, 8f)
+                    )
+            )
+            .child(
+                Row.create(c)
                     .widthDip(400f)
                     .heightDip(100f)
                     .positionDip(YogaEdge.ALL, NaN)
@@ -91,10 +112,16 @@ object HomeComponentSpec {
         listener.onHistoryClick()
     }
 
+    @OnEvent(ClickEvent::class)
+    fun onClickCreateWorkout(c: ComponentContext, @FromEvent view: View, @Prop listener: HomeComponentClickListener) {
+        Log.i(TAG, "History clicked")
+        listener.onClickCreateWorkout()
+    }
 
     interface HomeComponentClickListener {
         fun onHangboardClick()
         fun onHistoryClick()
+        fun onClickCreateWorkout()
     }
 
 
