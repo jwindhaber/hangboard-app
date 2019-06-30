@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class HangboardTimer(
     private val timeline: Timeline,
-    private val onUpdateCallback: (secondsLeft: Int, exerciseText: String, color: String) -> Unit
+    private val onUpdateCallback: (secondsLeft: Int, exerciseText: String, color: String, activityText: String) -> Unit
 ) {
 
 
@@ -24,24 +24,48 @@ class HangboardTimer(
         val tickerChannel = ticker(delayMillis = 1000, initialDelayMillis = 0)
 
         GlobalScope.launch(Dispatchers.Main) {
-            timeline.timeLineFragments.forEachIndexed { index, fragment ->
+
+            val timelineIterator = timeline.timeLineFragments.listIterator()
+
+
+            while (timelineIterator.hasNext()){
+                val fragment = timelineIterator.next()
+
                 var secondsLeft = fragment.durationInSeconds
 
-                // lets skip the first one
-                if (index != 0) {
-                    soundOnEndHold()
-                }
+                soundOnEndHold()
 
                 repeat(fragment.durationInSeconds) {
                     tickerChannel.receive()
                     onUpdateCallback(
                         secondsLeft,
                         fragment.fragmentIdentifier.toString(),
-                        fragment.fragmentIdentifier.color
+                        fragment.fragmentIdentifier.color,
+                        fragment.activityName
                     )
                     secondsLeft--
                 }
             }
+
+//            timeline.timeLineFragments.forEachIndexed { index, fragment ->
+//                var secondsLeft = fragment.durationInSeconds
+//
+//                // lets skip the first one
+//                if (index != 0) {
+//                    soundOnEndHold()
+//                }
+//
+//                repeat(fragment.durationInSeconds) {
+//                    tickerChannel.receive()
+//                    onUpdateCallback(
+//                        secondsLeft,
+//                        fragment.fragmentIdentifier.toString(),
+//                        fragment.fragmentIdentifier.color
+//                    )
+//                    secondsLeft--
+//                }
+//            }
+
             tickerChannel.cancel()
         }
     }
@@ -54,7 +78,7 @@ class HangboardTimer(
 
         handler.postAtTime({
             toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 375)
-        }, 0 + timeNow)
+        }, 100 + timeNow)
 
         handler.postAtTime({
             toneGenerator.startTone(ToneGenerator.TONE_CDMA_KEYPAD_VOLUME_KEY_LITE, 120)

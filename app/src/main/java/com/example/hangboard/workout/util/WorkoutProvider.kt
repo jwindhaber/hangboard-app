@@ -62,12 +62,15 @@ object WorkoutProvider {
         timelineFragments.add(TimelineFragment("PREPARE", 15, REST, initialExercise))
 
         workout.activities.forEach { activity ->
-            activity.exercises.forEach { exercise ->
+            val reps = activity.exercises.size
+
+            activity.exercises.forEachIndexed {index, exercise ->
+                val activityName = "${activity.name} (${index + 1}/${reps})"
                 repeat(exercise.repetitions){
-                    timelineFragments.add(TimelineFragment(activity.name, exercise.workUnit.work, WORK, exercise))
-                    timelineFragments.add(TimelineFragment(activity.name, exercise.workUnit.rest, REST, exercise))
+                    timelineFragments.add(TimelineFragment(activityName, exercise.workUnit.work, WORK, exercise))
+                    timelineFragments.add(TimelineFragment(activityName, exercise.workUnit.rest, REST, exercise))
                 }
-                timelineFragments.add(TimelineFragment(activity.name, activity.rest, REST, exercise))
+                timelineFragments.add(TimelineFragment("TODO NEXT ACTIVITY", activity.rest, REST, exercise))
             }
 
         }

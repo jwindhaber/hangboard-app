@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         homeComponent = HomeComponent.create(context).listener(listener).build()
-        root = LithoView.create(this,  homeComponent)
+        root = LithoView.create(this,  timerComponent)
         setContentView(root)
     }
 
