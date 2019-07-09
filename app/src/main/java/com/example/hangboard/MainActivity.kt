@@ -6,8 +6,8 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.example.hangboard.components.HomeComponent
 import com.example.hangboard.components.HomeComponentSpec
-import com.example.hangboard.components.TimerItem
 import com.example.hangboard.components.history.HistoryListSection
+import com.example.hangboard.components.timer.TimerItem
 import com.example.hangboard.components.workout.ExpandableWorkoutItem
 import com.example.hangboard.workout.util.WorkoutProvider
 import com.facebook.litho.ComponentContext

@@ -12,7 +12,6 @@ import com.example.hangboard.workout.dto.Workout
 object WorkoutProvider {
 
     private val defaultWorkUnit = WorkUnit("defaultWorkUnit", 7, 3)
-    private val initialExercise = Exercise("inital", 10, 7, 35, defaultWorkUnit)
 
     fun getWorkout() : Workout {
 
@@ -25,8 +24,8 @@ object WorkoutProvider {
                     name = "Edge",
                     rest= 240,
                     exercises = listOf(
-                        Exercise("first", 180, 7, 35, defaultWorkUnit),
-                        Exercise("first", 180, 6, 35, defaultWorkUnit),
+                        Exercise("first", 180, 7, 25, defaultWorkUnit),
+                        Exercise("first", 180, 6, 30, defaultWorkUnit),
                         Exercise("first", 180, 5, 35, defaultWorkUnit)
                     )
                 ),
@@ -34,8 +33,8 @@ object WorkoutProvider {
                     name = "One Hand Edge",
                     rest= 240,
                     exercises = listOf(
-                        Exercise("first", 180, 7, 35, defaultWorkUnit),
-                        Exercise("first", 180, 6, 35, defaultWorkUnit),
+                        Exercise("first", 180, 7, 25, defaultWorkUnit),
+                        Exercise("first", 180, 6, 30, defaultWorkUnit),
                         Exercise("first", 180, 5, 35, defaultWorkUnit)
                     )
                 ),
@@ -43,8 +42,8 @@ object WorkoutProvider {
                     name = "Pull UP One Hand",
                     rest= 240,
                     exercises = listOf(
-                        Exercise("first", 180, 7, 35, pullUpWorkUnit),
-                        Exercise("first", 180, 6, 35, pullUpWorkUnit),
+                        Exercise("first", 180, 7, 25, pullUpWorkUnit),
+                        Exercise("first", 180, 6, 30, pullUpWorkUnit),
                         Exercise("first", 180, 5, 35, pullUpWorkUnit)
                     )
                 )
@@ -58,19 +57,24 @@ object WorkoutProvider {
     fun workoutToTimeline(workout: Workout):Timeline{
         val timelineFragments = mutableListOf<TimelineFragment>()
 
-        //INITIAL REST
-        timelineFragments.add(TimelineFragment("PREPARE", 15, REST, initialExercise))
-
         workout.activities.forEach { activity ->
             val reps = activity.exercises.size
 
             activity.exercises.forEachIndexed {index, exercise ->
-                val activityName = "${activity.name} (${index + 1}/${reps})"
-                repeat(exercise.repetitions){
-                    timelineFragments.add(TimelineFragment(activityName, exercise.workUnit.work, WORK, exercise))
-                    timelineFragments.add(TimelineFragment(activityName, exercise.workUnit.rest, REST, exercise))
+
+                var rest = activity.rest
+                if(index == 0) {
+                    rest = 15
                 }
-                timelineFragments.add(TimelineFragment("TODO NEXT ACTIVITY", activity.rest, REST, exercise))
+
+                val activityName = "${activity.name} (${index + 1}/$reps)"
+                timelineFragments.add(TimelineFragment("$activityName", rest, "${exercise.weight}", REST, exercise))
+
+                repeat(exercise.repetitions){
+                    timelineFragments.add(TimelineFragment(activityName, exercise.workUnit.work, "${exercise.weight}", WORK, exercise))
+                    timelineFragments.add(TimelineFragment(activityName, exercise.workUnit.rest, "${exercise.weight}", REST, exercise))
+                }
+
             }
 
         }

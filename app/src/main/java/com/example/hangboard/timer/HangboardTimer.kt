@@ -4,20 +4,22 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Handler
 import android.os.SystemClock
+import com.example.hangboard.components.timer.TimerState
 import com.example.hangboard.timeline.Timeline
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicInteger
 
 
 class HangboardTimer(
     private val timeline: Timeline,
-    private val onUpdateCallback: (secondsLeft: Int, exerciseText: String, color: String, activityText: String) -> Unit
+    private val onUpdateCallback: (timerState: TimerState) -> Unit
 ) {
 
 
-    val toneGenerator = ToneGenerator(AudioManager.STREAM_ALARM, 100)
+    private val toneGenerator = ToneGenerator(AudioManager.STREAM_ALARM, 100)
 
     fun startTimer() {
 
@@ -26,9 +28,10 @@ class HangboardTimer(
         GlobalScope.launch(Dispatchers.Main) {
 
             val timelineIterator = timeline.timeLineFragments.listIterator()
+            val overallSecondsLeft = AtomicInteger(timeline.timeLineFragments.sumBy { it.durationInSeconds })
 
 
-            while (timelineIterator.hasNext()){
+            while (timelineIterator.hasNext()) {
                 val fragment = timelineIterator.next()
 
                 var secondsLeft = fragment.durationInSeconds
@@ -38,33 +41,19 @@ class HangboardTimer(
                 repeat(fragment.durationInSeconds) {
                     tickerChannel.receive()
                     onUpdateCallback(
-                        secondsLeft,
-                        fragment.fragmentIdentifier.toString(),
-                        fragment.fragmentIdentifier.color,
-                        fragment.activityName
+                        TimerState(
+                            secondsLeft,
+                            fragment.fragmentIdentifier.toString(),
+                            fragment.fragmentIdentifier.color,
+                            fragment.activityName,
+                            fragment.weight,
+                            overallSecondsLeft.getAndDecrement(),
+                            ""
+                        )
                     )
                     secondsLeft--
                 }
             }
-
-//            timeline.timeLineFragments.forEachIndexed { index, fragment ->
-//                var secondsLeft = fragment.durationInSeconds
-//
-//                // lets skip the first one
-//                if (index != 0) {
-//                    soundOnEndHold()
-//                }
-//
-//                repeat(fragment.durationInSeconds) {
-//                    tickerChannel.receive()
-//                    onUpdateCallback(
-//                        secondsLeft,
-//                        fragment.fragmentIdentifier.toString(),
-//                        fragment.fragmentIdentifier.color
-//                    )
-//                    secondsLeft--
-//                }
-//            }
 
             tickerChannel.cancel()
         }
