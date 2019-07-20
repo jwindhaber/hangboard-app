@@ -3,7 +3,7 @@ package com.example.hangboard.components.timer
 import android.graphics.Color
 import android.text.Layout
 import com.example.hangboard.components.style.TomorrowNightStyle.*
-import com.example.hangboard.timer.HangboardTimerAdvanced
+import com.example.hangboard.timer.HangboardTimer
 import com.example.hangboard.workout.definition.FragmentIdentifier
 import com.example.hangboard.workout.dto.Workout
 import com.example.hangboard.workout.util.TimeFormatter.getFormattedTime
@@ -255,7 +255,7 @@ object TimerItemSpec {
 
     @OnEvent(ClickEvent::class)
     fun onOnStartTimer(c: ComponentContext, @Prop workout: Workout) {
-        HangboardTimerAdvanced(workout) { timerState ->
+        HangboardTimer(workout) { timerState ->
             TimerItem.updateTimerState(c, timerState)
 
         }.startTimer()

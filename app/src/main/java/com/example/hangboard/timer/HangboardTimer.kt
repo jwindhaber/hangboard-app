@@ -4,20 +4,27 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Handler
 import android.os.SystemClock
+import android.util.Log
 import com.example.hangboard.components.timer.TimerState
-import com.example.hangboard.timeline.Timeline
+import com.example.hangboard.workout.definition.FragmentIdentifier
+import com.example.hangboard.workout.definition.FragmentIdentifier.REST
+import com.example.hangboard.workout.definition.FragmentIdentifier.WORK
+import com.example.hangboard.workout.dto.Activity
+import com.example.hangboard.workout.dto.Exercise
+import com.example.hangboard.workout.dto.WorkUnit
+import com.example.hangboard.workout.dto.Workout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
 
-class HangboardTimer(
-    private val timeline: Timeline,
-    private val onUpdateCallback: (timerState: TimerState) -> Unit
-) {
+class HangboardTimer(private val workout: Workout, private val onUpdateCallback: (timerState: TimerState) -> Unit) {
 
+    private val defaultWorkUnit = WorkUnit("defaultWorkUnit", 7, 3)
+    private val defaultExercise = Exercise("INITIAL", 15, 0, 0, defaultWorkUnit)
 
     private val toneGenerator = ToneGenerator(AudioManager.STREAM_ALARM, 100)
 
@@ -27,35 +34,83 @@ class HangboardTimer(
 
         GlobalScope.launch(Dispatchers.Main) {
 
-            val timelineIterator = timeline.timeLineFragments.listIterator()
-            val overallSecondsLeft = AtomicInteger(timeline.timeLineFragments.sumBy { it.durationInSeconds })
+            val overallRemainingSeconds = AtomicInteger(10 + evaluateRemainingTime(workout.activities, 0, 0))
+            val activitiesIterator = workout.activities.listIterator().withIndex()
 
 
-            while (timelineIterator.hasNext()) {
-                val fragment = timelineIterator.next()
+            repeatTick(defaultExercise, "INITIAL", tickerChannel, 10, REST, "0/${defaultExercise.repetitions}", overallRemainingSeconds)
 
-                var secondsLeft = fragment.durationInSeconds
+            while (activitiesIterator.hasNext()) {
+                val indexedActivity = activitiesIterator.next()
+                val exerciseIterator = indexedActivity.value.exercises.listIterator().withIndex()
 
-                soundOnEndHold()
+                while (exerciseIterator.hasNext()) {
 
-                repeat(fragment.durationInSeconds) {
-                    tickerChannel.receive()
-                    onUpdateCallback(
-                        TimerState(
-                            secondsLeft,
-                            fragment.fragmentIdentifier.toString(),
-                            fragment.fragmentIdentifier.color,
-                            fragment.activityName,
-                            fragment.weight,
-                            overallSecondsLeft.getAndDecrement(),
-                            ""
-                        )
-                    )
-                    secondsLeft--
+                    val indexedExercise = exerciseIterator.next()
+
+
+                    val exercise = indexedExercise.value
+                    val activityName = "${indexedActivity.value.name}: (${indexedExercise.index + 1}/${indexedActivity.value.exercises.size})"
+
+
+                    repeat(exercise.repetitions) {
+
+                        val reps = "${it + 1}/${exercise.repetitions}"
+
+                        soundOnEndHold()
+                        repeatTick(exercise, activityName, tickerChannel, exercise.workUnit.work, WORK, reps, overallRemainingSeconds)
+
+                        soundOnEndHold()
+                        repeatTick(exercise, activityName, tickerChannel, exercise.workUnit.rest, REST, reps, overallRemainingSeconds)
+                    }
+
+                    soundOnEndHold()
+                    repeatTick(exercise, activityName, tickerChannel, exercise.rest, REST, "0/${exercise.repetitions}", overallRemainingSeconds)
+
+
                 }
+
             }
 
             tickerChannel.cancel()
+        }
+    }
+
+    //TODO this is probably not really correct
+    fun evaluateRemainingTime(activities: List<Activity>, activityIndex: Int, exerciseIndex: Int): Int {
+
+        var overallTimeRemaining = 0
+
+        if (activityIndex < activities.size) {
+            activities.subList(activityIndex + 1, activities.size).forEach { activity ->
+                overallTimeRemaining += activity.exercises.sumBy { exercise ->
+                    return@sumBy exercise.rest + exercise.repetitions * (exercise.workUnit.work + exercise.workUnit.rest)
+                }
+            }
+        }
+
+        val exercises = activities[activityIndex].exercises
+        overallTimeRemaining += exercises.subList(exerciseIndex, exercises.size).sumBy { exercise ->
+            return@sumBy exercise.rest + exercise.repetitions * (exercise.workUnit.work + exercise.workUnit.rest)
+        }
+
+
+        Log.i("REMAINING_TIME", "Remaining time is: $overallTimeRemaining")
+        return overallTimeRemaining
+
+    }
+
+    private suspend fun repeatTick(exercise: Exercise, activityName: String, tickerChannel: ReceiveChannel<Unit>, seconds: Int, fragmentIdentifier: FragmentIdentifier, reps: String, exerciseSecondsLeft: AtomicInteger) {
+        var secondsLeft = seconds
+
+        repeat(seconds) {
+            tickerChannel.receive()
+
+            onUpdateCallback(
+                TimerState(secondsLeft, fragmentIdentifier.toString(), fragmentIdentifier.color, activityName, exercise.weight.toString(), exerciseSecondsLeft.getAndDecrement(), reps)
+            )
+
+            secondsLeft--
         }
     }
 
