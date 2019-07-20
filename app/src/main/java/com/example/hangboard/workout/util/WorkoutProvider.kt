@@ -12,6 +12,7 @@ import com.example.hangboard.workout.dto.Workout
 object WorkoutProvider {
 
     private val defaultWorkUnit = WorkUnit("defaultWorkUnit", 7, 3)
+    private val defaultExercise = Exercise("INITIAL", 15, 0, 0, defaultWorkUnit)
 
     fun getWorkout() : Workout {
 
@@ -24,8 +25,8 @@ object WorkoutProvider {
                     name = "Edge",
                     rest= 240,
                     exercises = listOf(
-                        Exercise("first", 180, 7, 25, defaultWorkUnit),
-                        Exercise("first", 180, 6, 30, defaultWorkUnit),
+                        Exercise("first", 10, 2, 25, defaultWorkUnit),
+                        Exercise("first", 10, 2, 30, defaultWorkUnit),
                         Exercise("first", 180, 5, 35, defaultWorkUnit)
                     )
                 ),

@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         val createWorkoutItem = ExpandableWorkoutItem.create(context).initialWorkout(WorkoutProvider.getWorkout()).build()
 
 
-        val timerComponent = TimerItem.create(context).timeline(WorkoutProvider.workoutToTimeline(WorkoutProvider.getWorkout())).build()
+        val timerComponent = TimerItem.create(context).workout(WorkoutProvider.getWorkout()).build()
 
         val historyComponent = RecyclerCollectionComponent.create(context)
             .disablePTR(true)

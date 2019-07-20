@@ -3,9 +3,9 @@ package com.example.hangboard.components.timer
 import android.graphics.Color
 import android.text.Layout
 import com.example.hangboard.components.style.TomorrowNightStyle.*
-import com.example.hangboard.timeline.Timeline
-import com.example.hangboard.timer.HangboardTimer
+import com.example.hangboard.timer.HangboardTimerAdvanced
 import com.example.hangboard.workout.definition.FragmentIdentifier
+import com.example.hangboard.workout.dto.Workout
 import com.example.hangboard.workout.util.TimeFormatter.getFormattedTime
 import com.facebook.litho.*
 import com.facebook.litho.annotations.*
@@ -19,7 +19,7 @@ object TimerItemSpec {
 
 
     @OnCreateLayout
-    fun onCreateLayout(c: ComponentContext, @Prop timeline: Timeline, @State timerState: TimerState): Component {
+    fun onCreateLayout(c: ComponentContext, @Prop workout: Workout, @State timerState: TimerState): Component {
         return Column.create(c)
 
             .child(
@@ -66,7 +66,7 @@ object TimerItemSpec {
                             .child(
                                 Text.create(c)
                                     .widthPercent(100f)
-                                    .text("Exercise")
+                                    .text("Reps")
                                     .textSizeSp(30f)
                                     .textAlignment(Layout.Alignment.ALIGN_CENTER)
                                     .backgroundColor(Selection.color)
@@ -254,8 +254,8 @@ object TimerItemSpec {
 
 
     @OnEvent(ClickEvent::class)
-    fun onOnStartTimer(c: ComponentContext, @Prop timeline: Timeline) {
-        HangboardTimer(timeline) { timerState ->
+    fun onOnStartTimer(c: ComponentContext, @Prop workout: Workout) {
+        HangboardTimerAdvanced(workout) { timerState ->
             TimerItem.updateTimerState(c, timerState)
 
         }.startTimer()
