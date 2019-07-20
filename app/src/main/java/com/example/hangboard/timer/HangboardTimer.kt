@@ -1,20 +1,16 @@
 package com.example.hangboard.timer
 
-import android.media.AudioManager
-import android.media.ToneGenerator
-import android.os.Handler
-import android.os.SystemClock
-import android.util.Log
 import com.example.hangboard.components.timer.TimerState
+import com.example.hangboard.timer.util.HanboardTimerUtils
 import com.example.hangboard.workout.definition.FragmentIdentifier
 import com.example.hangboard.workout.definition.FragmentIdentifier.REST
 import com.example.hangboard.workout.definition.FragmentIdentifier.WORK
-import com.example.hangboard.workout.dto.Activity
 import com.example.hangboard.workout.dto.Exercise
 import com.example.hangboard.workout.dto.WorkUnit
 import com.example.hangboard.workout.dto.Workout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.launch
@@ -26,15 +22,25 @@ class HangboardTimer(private val workout: Workout, private val onUpdateCallback:
     private val defaultWorkUnit = WorkUnit("defaultWorkUnit", 7, 3)
     private val defaultExercise = Exercise("INITIAL", 15, 0, 0, defaultWorkUnit)
 
-    private val toneGenerator = ToneGenerator(AudioManager.STREAM_ALARM, 100)
+    private lateinit var job: Job
+
+
+    fun pauseTimer() {
+        if(::job.isInitialized && job.isActive){
+            job.cancel()
+        }
+    }
 
     fun startTimer() {
+        if(::job.isInitialized && job.isActive){
+            job.cancel()
+        }
 
-        val tickerChannel = ticker(delayMillis = 1000, initialDelayMillis = 0)
+        this.job = GlobalScope.launch(Dispatchers.Main) {
 
-        GlobalScope.launch(Dispatchers.Main) {
+            val tickerChannel = ticker(delayMillis = 1000, initialDelayMillis = 0)
 
-            val overallRemainingSeconds = AtomicInteger(10 + evaluateRemainingTime(workout.activities, 0, 0))
+            val overallRemainingSeconds = AtomicInteger(10 + HanboardTimerUtils.evaluateRemainingTime(workout.activities, 0, 0))
             val activitiesIterator = workout.activities.listIterator().withIndex()
 
 
@@ -57,14 +63,14 @@ class HangboardTimer(private val workout: Workout, private val onUpdateCallback:
 
                         val reps = "${it + 1}/${exercise.repetitions}"
 
-                        soundOnEndHold()
+                        HanboardTimerUtils.soundOnEndHold()
                         repeatTick(exercise, activityName, tickerChannel, exercise.workUnit.work, WORK, reps, overallRemainingSeconds)
 
-                        soundOnEndHold()
+                        HanboardTimerUtils.soundOnEndHold()
                         repeatTick(exercise, activityName, tickerChannel, exercise.workUnit.rest, REST, reps, overallRemainingSeconds)
                     }
 
-                    soundOnEndHold()
+                    HanboardTimerUtils.soundOnEndHold()
                     repeatTick(exercise, activityName, tickerChannel, exercise.rest, REST, "0/${exercise.repetitions}", overallRemainingSeconds)
 
 
@@ -74,31 +80,9 @@ class HangboardTimer(private val workout: Workout, private val onUpdateCallback:
 
             tickerChannel.cancel()
         }
-    }
-
-    //TODO this is probably not really correct
-    fun evaluateRemainingTime(activities: List<Activity>, activityIndex: Int, exerciseIndex: Int): Int {
-
-        var overallTimeRemaining = 0
-
-        if (activityIndex < activities.size) {
-            activities.subList(activityIndex + 1, activities.size).forEach { activity ->
-                overallTimeRemaining += activity.exercises.sumBy { exercise ->
-                    return@sumBy exercise.rest + exercise.repetitions * (exercise.workUnit.work + exercise.workUnit.rest)
-                }
-            }
-        }
-
-        val exercises = activities[activityIndex].exercises
-        overallTimeRemaining += exercises.subList(exerciseIndex, exercises.size).sumBy { exercise ->
-            return@sumBy exercise.rest + exercise.repetitions * (exercise.workUnit.work + exercise.workUnit.rest)
-        }
-
-
-        Log.i("REMAINING_TIME", "Remaining time is: $overallTimeRemaining")
-        return overallTimeRemaining
 
     }
+
 
     private suspend fun repeatTick(exercise: Exercise, activityName: String, tickerChannel: ReceiveChannel<Unit>, seconds: Int, fragmentIdentifier: FragmentIdentifier, reps: String, exerciseSecondsLeft: AtomicInteger) {
         var secondsLeft = seconds
@@ -115,22 +99,4 @@ class HangboardTimer(private val workout: Workout, private val onUpdateCallback:
     }
 
 
-    fun soundOnEndHold() {
-
-        val handler = Handler()
-        val timeNow = SystemClock.uptimeMillis()
-
-        handler.postAtTime({
-            toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 375)
-        }, 100 + timeNow)
-
-        handler.postAtTime({
-            toneGenerator.startTone(ToneGenerator.TONE_CDMA_KEYPAD_VOLUME_KEY_LITE, 120)
-        }, 880 + timeNow)
-
-//        ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, "TONE_CDMA_ALERT_CALL_GUARD") // Perfect double
-//        ToneGenerator.TONE_CDMA_KEYPAD_VOLUME_KEY_LITE, "TONE_CDMA_KEYPAD_VOLUME_KEY_LITE") //perfect one timer
-//        ToneGenerator.TONE_CDMA_PIP, "TONE_CDMA_PIP")
-
-    }
 }

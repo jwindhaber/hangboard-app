@@ -19,7 +19,7 @@ object TimerItemSpec {
 
 
     @OnCreateLayout
-    fun onCreateLayout(c: ComponentContext, @Prop workout: Workout, @State timerState: TimerState): Component {
+    fun onCreateLayout(c: ComponentContext, @Prop workout: Workout, @State timerState: TimerState, @State stateSwitch: CurrentTimerState): Component {
         return Column.create(c)
 
             .child(
@@ -71,7 +71,7 @@ object TimerItemSpec {
                                     .textAlignment(Layout.Alignment.ALIGN_CENTER)
                                     .backgroundColor(Selection.color)
                                     .textColor(Blue.color)
-                                    .clickHandler(TimerItem.onOnStartTimer(c))
+//                                    .clickHandler(TimerItem.onOnStartTimer(c))
                             )
                     )
                     .child(
@@ -104,7 +104,7 @@ object TimerItemSpec {
                             .child(
                                 Text.create(c)
                                     .widthPercent(100f)
-                                    .text("${timerState.weight}")
+                                    .text(timerState.weight)
                                     .textSizeSp(30f)
                                     .textAlignment(Layout.Alignment.ALIGN_CENTER)
                                     .backgroundColor(Selection.color)
@@ -126,7 +126,7 @@ object TimerItemSpec {
                                     .textAlignment(Layout.Alignment.ALIGN_CENTER)
                                     .backgroundColor(Selection.color)
                                     .textColor(Blue.color)
-                                    .clickHandler(TimerItem.onOnStartTimer(c))
+//                                    .clickHandler(TimerItem.onOnStartTimer(c))
                             )
                     )
                     .child(
@@ -217,7 +217,7 @@ object TimerItemSpec {
                             .child(
                                 Text.create(c)
                                     .widthPercent(100f)
-                                    .text("START")
+                                    .text(stateSwitch.name)
                                     .textSizeSp(30f)
                                     .textAlignment(Layout.Alignment.ALIGN_CENTER)
                                     .backgroundColor(Selection.color)
@@ -254,12 +254,23 @@ object TimerItemSpec {
 
 
     @OnEvent(ClickEvent::class)
-    fun onOnStartTimer(c: ComponentContext, @Prop workout: Workout) {
-        HangboardTimer(workout) { timerState ->
-            TimerItem.updateTimerState(c, timerState)
+    fun onOnStartTimer(c: ComponentContext, @State stateSwitch: CurrentTimerState, @Prop workout: Workout ) {
 
-        }.startTimer()
+        if(stateSwitch == CurrentTimerState.START) {
+            val hangboardTimer = HangboardTimer(workout) { timerState ->
+                TimerItem.updateTimerState(c, timerState)
+            }
+            hangboardTimer.startTimer()
+
+            TimerItem.updateCurrentState(c, CurrentTimerState.PAUSE)
+        }
     }
+
+    @OnUpdateState
+    fun updateCurrentState(stateSwitch: StateValue<CurrentTimerState>, @Param updatedTimerState: CurrentTimerState) {
+        stateSwitch.set(updatedTimerState)
+    }
+
 
     @OnUpdateState
     fun updateTimerState(timerState: StateValue<TimerState>, @Param updatedTimerState: TimerState) {
@@ -267,8 +278,9 @@ object TimerItemSpec {
     }
 
     @OnCreateInitialState
-    fun createInitialState(c: ComponentContext, timerState: StateValue<TimerState>) {
-        timerState.set(TimerState(0, "INIT", FragmentIdentifier.WORK.color, "INIT", "0", 0, "1/1"))
+    fun createInitialState(c: ComponentContext, timerState: StateValue<TimerState>, stateSwitch: StateValue<CurrentTimerState>) {
+        timerState.set(TimerState(0, "INIT", FragmentIdentifier.REST.color, "INIT", "0", 0, "0/0"))
+        stateSwitch.set(CurrentTimerState.START)
 
     }
 
