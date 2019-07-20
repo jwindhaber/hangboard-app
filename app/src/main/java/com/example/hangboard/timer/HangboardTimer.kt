@@ -3,10 +3,7 @@ package com.example.hangboard.timer
 import com.example.hangboard.components.timer.TimerState
 import com.example.hangboard.timer.util.HanboardTimerUtils
 import com.example.hangboard.workout.definition.FragmentIdentifier
-import com.example.hangboard.workout.definition.FragmentIdentifier.REST
-import com.example.hangboard.workout.definition.FragmentIdentifier.WORK
-import com.example.hangboard.workout.dto.Exercise
-import com.example.hangboard.workout.dto.WorkUnit
+import com.example.hangboard.workout.definition.FragmentIdentifier.*
 import com.example.hangboard.workout.dto.Workout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -14,13 +11,58 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicInteger
 
 
 class HangboardTimer(private val workout: Workout) {
 
-    private val defaultWorkUnit = WorkUnit("defaultWorkUnit", 7, 3)
-    private val defaultExercise = Exercise("INITIAL", 15, 0, 0, defaultWorkUnit)
+    private val workoutTimeline: List<WorkoutTimelineUnit> = createWorkoutTimeline(workout)
+    private var indexState = 0
+
+    private fun createWorkoutTimeline(workout: Workout): List<WorkoutTimelineUnit> {
+
+        val workoutTimeline = mutableListOf<WorkoutTimelineUnit>()
+
+
+        //Initial Pause
+
+        val initialActivityName = "${workout.activities.first().name}: (0/${workout.activities.first().exercises.size})"
+        val initialWeight = workout.activities.first().exercises.first().weight
+        val initialReps = "0/${workout.activities.first().exercises.first().repetitions}"
+        val initialRest = 10
+        val initialOverallSecondsLeft = initialRest + HanboardTimerUtils.evaluateRemainingTime(workout.activities, 0, 0)
+        workoutTimeline.add(WorkoutTimelineUnit(initialActivityName, initialWeight, initialReps, initialOverallSecondsLeft, SESSION_REST, initialRest ))
+
+        workout.activities.forEachIndexed { activitiesIndex, activity ->
+
+            activity.exercises.forEachIndexed {exerciseIndex, exercise ->
+                val activityName = "${activity.name}: (${exerciseIndex+1}/${activity.exercises.size})"
+                var overallSecondsLeft = HanboardTimerUtils.evaluateRemainingTime(workout.activities, activitiesIndex, exerciseIndex)
+                val secondsWorkUnitWork = exercise.workUnit.work
+                val secondsWorkUnitRest = exercise.workUnit.rest
+                val weight = exercise.weight
+
+                repeat(exercise.repetitions){ repetition ->
+
+                    val reps = "${repetition+1}/${exercise.repetitions}"
+
+                    workoutTimeline.add(WorkoutTimelineUnit(activityName, weight, reps, overallSecondsLeft, WORK, secondsWorkUnitWork))
+                    overallSecondsLeft -= secondsWorkUnitWork
+                    workoutTimeline.add(WorkoutTimelineUnit(activityName, weight, reps, overallSecondsLeft, REST, secondsWorkUnitRest ))
+                    overallSecondsLeft -= secondsWorkUnitRest
+                }
+
+                //todo reps and overall time
+                workoutTimeline.add(WorkoutTimelineUnit("NEXT: $activityName", weight, "(0/0)", overallSecondsLeft, SESSION_REST, exercise.rest ))
+
+            }
+
+        }
+
+        return workoutTimeline
+    }
+
+    data class WorkoutTimelineUnit(val activityName: String, val weight: Int, val reps: String, val overallSecondsLeft: Int, val timerStatus: FragmentIdentifier, val seconds: Int)
+
 
     private var hangboardTimerState: HangboardTimerState = HangboardTimerState(0, 0)
     private lateinit var job: Job
@@ -44,45 +86,19 @@ class HangboardTimer(private val workout: Workout) {
 
             val tickerChannel = ticker(delayMillis = 1000, initialDelayMillis = 0)
 
-            val activitiesIterator = workout.activities.listIterator().withIndex()
-            progressIteratorUntilIndexReached(activitiesIterator, hangboardTimerState.activityIndex)
+            val workOutTimelineIterator = workoutTimeline.listIterator().withIndex()
+            if(indexState != 0){
+                progressIteratorUntilIndexReached(workOutTimelineIterator, indexState)
+            }
 
-            val overallRemainingSeconds = AtomicInteger(10 + HanboardTimerUtils.evaluateRemainingTime(workout.activities, hangboardTimerState.activityIndex, hangboardTimerState.exerciseIndex))
-            repeatTick(onUpdateCallback, defaultExercise, "INITIAL", tickerChannel, 10, REST, "0/${defaultExercise.repetitions}", overallRemainingSeconds)
+            while(workOutTimelineIterator.hasNext()){
+                val indexedValue = workOutTimelineIterator.next()
+                val workoutTimelineUnit = indexedValue.value
+                indexState = indexedValue.index
 
+                HanboardTimerUtils.soundOnEndHold()
+                repeatTick(onUpdateCallback, workoutTimelineUnit.activityName, workoutTimelineUnit.weight, tickerChannel, workoutTimelineUnit.seconds, workoutTimelineUnit.timerStatus, workoutTimelineUnit.reps, workoutTimelineUnit.overallSecondsLeft)
 
-            while (activitiesIterator.hasNext()) {
-                val indexedActivity = activitiesIterator.next()
-                hangboardTimerState.activityIndex = indexedActivity.index-1
-
-                val exerciseIterator = indexedActivity.value.exercises.listIterator().withIndex()
-
-                progressIteratorUntilIndexReached(exerciseIterator, hangboardTimerState.exerciseIndex)
-
-                while (exerciseIterator.hasNext()) {
-                    val indexedExercise = exerciseIterator.next()
-                    hangboardTimerState.activityIndex = indexedExercise.index-1
-
-                    val exercise = indexedExercise.value
-                    val activityName = "${indexedActivity.value.name}: (${indexedExercise.index + 1}/${indexedActivity.value.exercises.size})"
-
-
-                    repeat(exercise.repetitions) {
-
-                        val reps = "${it + 1}/${exercise.repetitions}"
-
-                        HanboardTimerUtils.soundOnEndHold()
-                        repeatTick(onUpdateCallback, exercise, activityName, tickerChannel, exercise.workUnit.work, WORK, reps, overallRemainingSeconds)
-
-                        HanboardTimerUtils.soundOnEndHold()
-                        repeatTick(onUpdateCallback, exercise, activityName, tickerChannel, exercise.workUnit.rest, REST, reps, overallRemainingSeconds)
-                    }
-
-                    HanboardTimerUtils.soundOnEndHold()
-                    repeatTick(onUpdateCallback, exercise, activityName, tickerChannel, exercise.rest, REST, "0/${exercise.repetitions}", overallRemainingSeconds)
-
-
-                }
 
             }
 
@@ -94,7 +110,7 @@ class HangboardTimer(private val workout: Workout) {
     private fun <T> progressIteratorUntilIndexReached(indexedIterator: Iterator<IndexedValue<T>>, index: Int) {
         while (indexedIterator.hasNext()) {
             val indexedValue = indexedIterator.next().index
-            if (indexedValue == index) {
+            if (indexedValue == index-1) {
                 break
             }
         }
@@ -102,14 +118,15 @@ class HangboardTimer(private val workout: Workout) {
     }
 
 
-    private suspend fun repeatTick(onUpdateCallback: (timerState: TimerState) -> Unit, exercise: Exercise, activityName: String, tickerChannel: ReceiveChannel<Unit>, seconds: Int, fragmentIdentifier: FragmentIdentifier, reps: String, exerciseSecondsLeft: AtomicInteger) {
+    private suspend fun repeatTick(onUpdateCallback: (timerState: TimerState) -> Unit, activityName: String, weight: Int, tickerChannel: ReceiveChannel<Unit>, seconds: Int, fragmentIdentifier: FragmentIdentifier, reps: String, exerciseSecondsLeft: Int) {
         var secondsLeft = seconds
+        var inlineExerciseSecondsLeft = exerciseSecondsLeft
 
         repeat(seconds) {
             tickerChannel.receive()
 
             onUpdateCallback(
-                TimerState(secondsLeft, fragmentIdentifier.toString(), fragmentIdentifier.color, activityName, exercise.weight.toString(), exerciseSecondsLeft.getAndDecrement(), reps)
+                TimerState(secondsLeft, fragmentIdentifier.text, fragmentIdentifier.color, activityName, weight.toString(), inlineExerciseSecondsLeft--, reps)
             )
 
             secondsLeft--

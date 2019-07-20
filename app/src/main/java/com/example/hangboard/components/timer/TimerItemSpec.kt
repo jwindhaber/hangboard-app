@@ -277,7 +277,7 @@ object TimerItemSpec {
 
     @OnCreateInitialState
     fun createInitialState(c: ComponentContext, timerState: StateValue<TimerState>, stateSwitch: StateValue<CurrentTimerState>) {
-        timerState.set(TimerState(0, "INIT", FragmentIdentifier.REST.color, "INIT", "0", 0, "0/0"))
+        timerState.set(TimerState(0, "INIT", FragmentIdentifier.SESSION_REST.color, "INIT", "-", 0, "-/-"))
         stateSwitch.set(CurrentTimerState.START)
 
     }
