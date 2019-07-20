@@ -30,29 +30,46 @@ class HangboardTimer(private val workout: Workout) {
         val initialReps = "0/${workout.activities.first().exercises.first().repetitions}"
         val initialRest = 10
         val initialOverallSecondsLeft = initialRest + HanboardTimerUtils.evaluateRemainingTime(workout.activities, 0, 0)
-        workoutTimeline.add(WorkoutTimelineUnit(initialActivityName, initialWeight, initialReps, initialOverallSecondsLeft, SESSION_REST, initialRest ))
+        workoutTimeline.add(WorkoutTimelineUnit(initialActivityName, initialWeight, initialReps, initialOverallSecondsLeft, SESSION_REST, initialRest))
 
         workout.activities.forEachIndexed { activitiesIndex, activity ->
 
-            activity.exercises.forEachIndexed {exerciseIndex, exercise ->
-                val activityName = "${activity.name}: (${exerciseIndex+1}/${activity.exercises.size})"
+            activity.exercises.forEachIndexed { exerciseIndex, exercise ->
+                val activityName = "${activity.name}: (${exerciseIndex + 1}/${activity.exercises.size})"
                 var overallSecondsLeft = HanboardTimerUtils.evaluateRemainingTime(workout.activities, activitiesIndex, exerciseIndex)
                 val secondsWorkUnitWork = exercise.workUnit.work
                 val secondsWorkUnitRest = exercise.workUnit.rest
                 val weight = exercise.weight
 
-                repeat(exercise.repetitions){ repetition ->
+                repeat(exercise.repetitions) { repetition ->
 
-                    val reps = "${repetition+1}/${exercise.repetitions}"
+                    val reps = "${repetition + 1}/${exercise.repetitions}"
 
                     workoutTimeline.add(WorkoutTimelineUnit(activityName, weight, reps, overallSecondsLeft, WORK, secondsWorkUnitWork))
                     overallSecondsLeft -= secondsWorkUnitWork
-                    workoutTimeline.add(WorkoutTimelineUnit(activityName, weight, reps, overallSecondsLeft, REST, secondsWorkUnitRest ))
+                    workoutTimeline.add(WorkoutTimelineUnit(activityName, weight, reps, overallSecondsLeft, REST, secondsWorkUnitRest))
                     overallSecondsLeft -= secondsWorkUnitRest
                 }
 
-                //todo reps and overall time
-                workoutTimeline.add(WorkoutTimelineUnit("NEXT: $activityName", weight, "(0/0)", overallSecondsLeft, SESSION_REST, exercise.rest ))
+                var nextActivityName = ""
+                var nextWeight = 0
+                when {
+                    exerciseIndex + 1 < activity.exercises.size -> {
+                        nextActivityName = "NEXT: ${activity.name}: (${exerciseIndex + 2}/${activity.exercises.size})"
+                        nextWeight = activity.exercises[exerciseIndex + 1].weight
+                    }
+                    activitiesIndex + 1 < workout.activities.size -> {
+                        nextActivityName = "NEXT: ${workout.activities[activitiesIndex + 1].name}"
+                        nextWeight = workout.activities[activitiesIndex + 1].exercises.first().weight
+                    }
+                    else -> {
+                        nextActivityName = "GAME OVER"
+                        nextWeight = 0
+                    }
+                }
+
+
+                workoutTimeline.add(WorkoutTimelineUnit(nextActivityName, nextWeight, "(-/-)", overallSecondsLeft, SESSION_REST, exercise.rest))
 
             }
 
@@ -67,7 +84,28 @@ class HangboardTimer(private val workout: Workout) {
     private var hangboardTimerState: HangboardTimerState = HangboardTimerState(0, 0)
     private lateinit var job: Job
 
-    class HangboardTimerState (var activityIndex: Int, var exerciseIndex: Int)
+    class HangboardTimerState(var activityIndex: Int, var exerciseIndex: Int)
+
+
+    fun previousTimer(onUpdateCallback: (timerState: TimerState) -> Unit) {
+        if (::job.isInitialized && job.isActive) {
+            job.cancel()
+        }
+        if (indexState > 0) {
+            indexState--
+        }
+        startTimer(onUpdateCallback)
+    }
+
+    fun nextTimer(onUpdateCallback: (timerState: TimerState) -> Unit) {
+        if (::job.isInitialized && job.isActive) {
+            job.cancel()
+        }
+        if (indexState < workoutTimeline.size) {
+            indexState++
+        }
+        startTimer(onUpdateCallback)
+    }
 
 
     fun pauseTimer() {
@@ -87,11 +125,11 @@ class HangboardTimer(private val workout: Workout) {
             val tickerChannel = ticker(delayMillis = 1000, initialDelayMillis = 0)
 
             val workOutTimelineIterator = workoutTimeline.listIterator().withIndex()
-            if(indexState != 0){
+            if (indexState != 0) {
                 progressIteratorUntilIndexReached(workOutTimelineIterator, indexState)
             }
 
-            while(workOutTimelineIterator.hasNext()){
+            while (workOutTimelineIterator.hasNext()) {
                 val indexedValue = workOutTimelineIterator.next()
                 val workoutTimelineUnit = indexedValue.value
                 indexState = indexedValue.index
@@ -110,7 +148,7 @@ class HangboardTimer(private val workout: Workout) {
     private fun <T> progressIteratorUntilIndexReached(indexedIterator: Iterator<IndexedValue<T>>, index: Int) {
         while (indexedIterator.hasNext()) {
             val indexedValue = indexedIterator.next().index
-            if (indexedValue == index-1) {
+            if (indexedValue == index - 1) {
                 break
             }
         }

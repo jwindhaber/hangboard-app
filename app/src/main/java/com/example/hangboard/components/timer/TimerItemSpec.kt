@@ -204,7 +204,7 @@ object TimerItemSpec {
                                     .textAlignment(Layout.Alignment.ALIGN_CENTER)
                                     .backgroundColor(Selection.color)
                                     .textColor(Blue.color)
-//                                    .clickHandler(TimerItem.onOnStartTimer(c))
+                                    .clickHandler(TimerItem.onPreviousTimer(c))
                             )
                     )
                     .child(
@@ -221,7 +221,7 @@ object TimerItemSpec {
                                     .textAlignment(Layout.Alignment.ALIGN_CENTER)
                                     .backgroundColor(Selection.color)
                                     .textColor(Blue.color)
-                                    .clickHandler(TimerItem.onOnStartTimer(c))
+                                    .clickHandler(TimerItem.onStartTimer(c))
                             )
                     )
                     .child(
@@ -238,7 +238,7 @@ object TimerItemSpec {
                                     .textAlignment(Layout.Alignment.ALIGN_CENTER)
                                     .backgroundColor(Selection.color)
                                     .textColor(Blue.color)
-//                                    .clickHandler(TimerItem.onOnStartTimer(c))
+                                    .clickHandler(TimerItem.onNextTimer(c))
                             )
                     )
                     .widthPercent(100f)
@@ -251,9 +251,19 @@ object TimerItemSpec {
             .build()
     }
 
+    @OnEvent(ClickEvent::class)
+    fun onPreviousTimer(c: ComponentContext, @Prop hangboardTimer: HangboardTimer ) {
+            hangboardTimer.previousTimer { timerState -> TimerItem.updateTimerState(c, timerState) }
+    }
 
     @OnEvent(ClickEvent::class)
-    fun onOnStartTimer(c: ComponentContext, @State stateSwitch: CurrentTimerState, @Prop hangboardTimer: HangboardTimer ) {
+    fun onNextTimer(c: ComponentContext, @Prop hangboardTimer: HangboardTimer ) {
+        hangboardTimer.nextTimer { timerState -> TimerItem.updateTimerState(c, timerState) }
+    }
+
+
+    @OnEvent(ClickEvent::class)
+    fun onStartTimer(c: ComponentContext, @State stateSwitch: CurrentTimerState, @Prop hangboardTimer: HangboardTimer ) {
 
         if(stateSwitch == CurrentTimerState.START) {
             hangboardTimer.startTimer { timerState -> TimerItem.updateTimerState(c, timerState) }

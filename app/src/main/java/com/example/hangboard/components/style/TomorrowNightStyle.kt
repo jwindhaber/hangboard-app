@@ -19,3 +19,5 @@ enum class TomorrowNightStyle(val color: Int) {
     Purple(Color.parseColor("#b294bb")),
 
 }
+
+
