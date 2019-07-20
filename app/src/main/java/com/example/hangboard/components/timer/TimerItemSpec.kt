@@ -5,7 +5,6 @@ import android.text.Layout
 import com.example.hangboard.components.style.TomorrowNightStyle.*
 import com.example.hangboard.timer.HangboardTimer
 import com.example.hangboard.workout.definition.FragmentIdentifier
-import com.example.hangboard.workout.dto.Workout
 import com.example.hangboard.workout.util.TimeFormatter.getFormattedTime
 import com.facebook.litho.*
 import com.facebook.litho.annotations.*
@@ -19,7 +18,7 @@ object TimerItemSpec {
 
 
     @OnCreateLayout
-    fun onCreateLayout(c: ComponentContext, @Prop workout: Workout, @State timerState: TimerState, @State stateSwitch: CurrentTimerState): Component {
+    fun onCreateLayout(c: ComponentContext, @State timerState: TimerState, @State stateSwitch: CurrentTimerState): Component {
         return Column.create(c)
 
             .child(
@@ -254,15 +253,14 @@ object TimerItemSpec {
 
 
     @OnEvent(ClickEvent::class)
-    fun onOnStartTimer(c: ComponentContext, @State stateSwitch: CurrentTimerState, @Prop workout: Workout ) {
+    fun onOnStartTimer(c: ComponentContext, @State stateSwitch: CurrentTimerState, @Prop hangboardTimer: HangboardTimer ) {
 
         if(stateSwitch == CurrentTimerState.START) {
-            val hangboardTimer = HangboardTimer(workout) { timerState ->
-                TimerItem.updateTimerState(c, timerState)
-            }
-            hangboardTimer.startTimer()
-
+            hangboardTimer.startTimer { timerState -> TimerItem.updateTimerState(c, timerState) }
             TimerItem.updateCurrentState(c, CurrentTimerState.PAUSE)
+        } else{
+            hangboardTimer.pauseTimer()
+            TimerItem.updateCurrentState(c, CurrentTimerState.START)
         }
     }
 

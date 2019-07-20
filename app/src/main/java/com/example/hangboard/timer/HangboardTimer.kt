@@ -17,22 +17,26 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
 
-class HangboardTimer(private val workout: Workout, private val onUpdateCallback: (timerState: TimerState) -> Unit) {
+class HangboardTimer(private val workout: Workout) {
 
     private val defaultWorkUnit = WorkUnit("defaultWorkUnit", 7, 3)
     private val defaultExercise = Exercise("INITIAL", 15, 0, 0, defaultWorkUnit)
 
+    private var hangboardTimerState: HangboardTimerState = HangboardTimerState(0, 0)
     private lateinit var job: Job
+
+    class HangboardTimerState (var activityIndex: Int, var exerciseIndex: Int)
 
 
     fun pauseTimer() {
-        if(::job.isInitialized && job.isActive){
+        if (::job.isInitialized && job.isActive) {
             job.cancel()
         }
     }
 
-    fun startTimer() {
-        if(::job.isInitialized && job.isActive){
+
+    fun startTimer(onUpdateCallback: (timerState: TimerState) -> Unit) {
+        if (::job.isInitialized && job.isActive) {
             job.cancel()
         }
 
@@ -40,20 +44,24 @@ class HangboardTimer(private val workout: Workout, private val onUpdateCallback:
 
             val tickerChannel = ticker(delayMillis = 1000, initialDelayMillis = 0)
 
-            val overallRemainingSeconds = AtomicInteger(10 + HanboardTimerUtils.evaluateRemainingTime(workout.activities, 0, 0))
             val activitiesIterator = workout.activities.listIterator().withIndex()
+            progressIteratorUntilIndexReached(activitiesIterator, hangboardTimerState.activityIndex)
 
+            val overallRemainingSeconds = AtomicInteger(10 + HanboardTimerUtils.evaluateRemainingTime(workout.activities, hangboardTimerState.activityIndex, hangboardTimerState.exerciseIndex))
+            repeatTick(onUpdateCallback, defaultExercise, "INITIAL", tickerChannel, 10, REST, "0/${defaultExercise.repetitions}", overallRemainingSeconds)
 
-            repeatTick(defaultExercise, "INITIAL", tickerChannel, 10, REST, "0/${defaultExercise.repetitions}", overallRemainingSeconds)
 
             while (activitiesIterator.hasNext()) {
                 val indexedActivity = activitiesIterator.next()
+                hangboardTimerState.activityIndex = indexedActivity.index-1
+
                 val exerciseIterator = indexedActivity.value.exercises.listIterator().withIndex()
 
+                progressIteratorUntilIndexReached(exerciseIterator, hangboardTimerState.exerciseIndex)
+
                 while (exerciseIterator.hasNext()) {
-
                     val indexedExercise = exerciseIterator.next()
-
+                    hangboardTimerState.activityIndex = indexedExercise.index-1
 
                     val exercise = indexedExercise.value
                     val activityName = "${indexedActivity.value.name}: (${indexedExercise.index + 1}/${indexedActivity.value.exercises.size})"
@@ -64,14 +72,14 @@ class HangboardTimer(private val workout: Workout, private val onUpdateCallback:
                         val reps = "${it + 1}/${exercise.repetitions}"
 
                         HanboardTimerUtils.soundOnEndHold()
-                        repeatTick(exercise, activityName, tickerChannel, exercise.workUnit.work, WORK, reps, overallRemainingSeconds)
+                        repeatTick(onUpdateCallback, exercise, activityName, tickerChannel, exercise.workUnit.work, WORK, reps, overallRemainingSeconds)
 
                         HanboardTimerUtils.soundOnEndHold()
-                        repeatTick(exercise, activityName, tickerChannel, exercise.workUnit.rest, REST, reps, overallRemainingSeconds)
+                        repeatTick(onUpdateCallback, exercise, activityName, tickerChannel, exercise.workUnit.rest, REST, reps, overallRemainingSeconds)
                     }
 
                     HanboardTimerUtils.soundOnEndHold()
-                    repeatTick(exercise, activityName, tickerChannel, exercise.rest, REST, "0/${exercise.repetitions}", overallRemainingSeconds)
+                    repeatTick(onUpdateCallback, exercise, activityName, tickerChannel, exercise.rest, REST, "0/${exercise.repetitions}", overallRemainingSeconds)
 
 
                 }
@@ -83,8 +91,18 @@ class HangboardTimer(private val workout: Workout, private val onUpdateCallback:
 
     }
 
+    private fun <T> progressIteratorUntilIndexReached(indexedIterator: Iterator<IndexedValue<T>>, index: Int) {
+        while (indexedIterator.hasNext()) {
+            val indexedValue = indexedIterator.next().index
+            if (indexedValue == index) {
+                break
+            }
+        }
 
-    private suspend fun repeatTick(exercise: Exercise, activityName: String, tickerChannel: ReceiveChannel<Unit>, seconds: Int, fragmentIdentifier: FragmentIdentifier, reps: String, exerciseSecondsLeft: AtomicInteger) {
+    }
+
+
+    private suspend fun repeatTick(onUpdateCallback: (timerState: TimerState) -> Unit, exercise: Exercise, activityName: String, tickerChannel: ReceiveChannel<Unit>, seconds: Int, fragmentIdentifier: FragmentIdentifier, reps: String, exerciseSecondsLeft: AtomicInteger) {
         var secondsLeft = seconds
 
         repeat(seconds) {

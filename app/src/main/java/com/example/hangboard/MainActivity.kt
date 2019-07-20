@@ -9,6 +9,7 @@ import com.example.hangboard.components.HomeComponentSpec
 import com.example.hangboard.components.history.HistoryListSection
 import com.example.hangboard.components.timer.TimerItem
 import com.example.hangboard.components.workout.ExpandableWorkoutItem
+import com.example.hangboard.timer.HangboardTimer
 import com.example.hangboard.workout.util.WorkoutProvider
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.LithoView
@@ -46,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         val createWorkoutItem = ExpandableWorkoutItem.create(context).initialWorkout(WorkoutProvider.getWorkout()).build()
 
 
-        val timerComponent = TimerItem.create(context).workout(WorkoutProvider.getWorkout()).build()
+        val timerComponent = TimerItem.create(context).hangboardTimer(HangboardTimer(WorkoutProvider.getWorkout())).build()
 
         val historyComponent = RecyclerCollectionComponent.create(context)
             .disablePTR(true)
