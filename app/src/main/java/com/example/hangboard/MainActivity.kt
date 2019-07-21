@@ -32,6 +32,21 @@ class MainActivity : AppCompatActivity() {
         val context = ComponentContext(this)
 
 
+//        val gifSelectHandler = EventHandler(HasEventDispatcher {
+//
+//            EventDispatcher { eventHandler, eventState ->
+//                val event = eventState as DeleteActivityEvent
+//
+//            }
+//
+//        }, 123456, null)
+
+
+
+
+
+
+
 //        val createWorkoutItem = RecyclerCollectionComponent.create(context)
 //            .disablePTR(true)
 //            .section(WorkoutItemSection.create(SectionContext(context)).workout(WorkoutProvider.getWorkout()).build())
@@ -72,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         homeComponent = HomeComponent.create(context).listener(listener).build()
-        root = LithoView.create(this,  timerComponent)
+        root = LithoView.create(this,  createWorkoutItem)
         setContentView(root)
     }
 

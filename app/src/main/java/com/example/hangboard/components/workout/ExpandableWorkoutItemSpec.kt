@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.text.Layout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hangboard.components.style.TomorrowNightStyle.*
+import com.example.hangboard.components.workout.events.DeleteActivityEvent
 import com.example.hangboard.workout.dto.Activity
 import com.example.hangboard.workout.dto.Exercise
 import com.example.hangboard.workout.dto.WorkUnit
@@ -84,10 +85,30 @@ object ExpandableWorkoutItemSpec {
 
     @OnEvent(RenderEvent::class)
     fun onRender(c: ComponentContext, @FromEvent model: Activity): RenderInfo {
+
+        val hasEventDispatcher = object : HasEventDispatcher {
+            override fun getEventDispatcher(): EventDispatcher {
+
+                return object : EventDispatcher {
+                    override fun dispatchOnEvent(eventHandler: EventHandler<*>?, eventState: Any?): Any? {
+                        val event = eventState as DeleteActivityEvent
+                        ExpandableWorkoutItem.removeActivityFromListSync(c, event.activityId)
+                        return null
+                    }
+
+                }
+            }
+
+        }
+
+        val deleteActivityHandler = EventHandler<DeleteActivityEvent>(hasEventDispatcher, 1234, null)
+
+
         return ComponentRenderInfo.create()
             .component(
                 ActivityItem.create(c)
                     .activity(model)
+                    .deleteActivityEventHandler(deleteActivityHandler)
                     .build()
             )
             .build()
@@ -97,6 +118,21 @@ object ExpandableWorkoutItemSpec {
     fun onClick(c: ComponentContext, @State workout: Workout, @Param adding: Boolean) {
         ExpandableWorkoutItem.onUpdateListSync(c, adding)
     }
+
+    @OnUpdateState
+    fun removeActivityFromList(workout: StateValue<Workout>, @Param activityId: String) {
+        //Null guard
+        val initialWorkout = workout.get() ?: return
+
+        val activitiesListToUpdate = ArrayList(initialWorkout.activities)
+        activitiesListToUpdate.removeAll { it.activityId == activityId }
+
+
+        initialWorkout.activities = activitiesListToUpdate
+        workout.set(initialWorkout)
+    }
+
+
 
     @OnUpdateState
     fun onUpdateList(workout: StateValue<Workout>, @Param adding: Boolean) {

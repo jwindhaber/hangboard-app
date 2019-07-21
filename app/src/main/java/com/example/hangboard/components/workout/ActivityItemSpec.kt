@@ -5,20 +5,16 @@ import android.text.InputFilter
 import android.text.InputType
 import com.example.hangboard.components.style.TomorrowNightStyle.Background
 import com.example.hangboard.components.style.TomorrowNightStyle.Foreground
+import com.example.hangboard.components.workout.events.DeleteActivityEvent
 import com.example.hangboard.workout.dto.Activity
-import com.facebook.litho.Column
-import com.facebook.litho.Component
-import com.facebook.litho.ComponentContext
-import com.facebook.litho.Row
-import com.facebook.litho.annotations.LayoutSpec
-import com.facebook.litho.annotations.OnCreateLayout
-import com.facebook.litho.annotations.Prop
+import com.facebook.litho.*
+import com.facebook.litho.annotations.*
 import com.facebook.litho.widget.Text
 import com.facebook.litho.widget.TextInput
 import com.facebook.yoga.YogaAlign
 
 
-@LayoutSpec
+@LayoutSpec(events = [DeleteActivityEvent::class])
 object ActivityItemSpec {
 
     private const val TAG = "ActivityItemSpec"
@@ -38,7 +34,7 @@ object ActivityItemSpec {
                     .alignSelf(YogaAlign.FLEX_START)
                     .child(
                         Row.create(c)
-                            .widthDip(340f)
+                            .widthDip(250f)
                             .heightDip(30f)
                             .child(
                                 TextInput.create(c)
@@ -49,6 +45,18 @@ object ActivityItemSpec {
                                     .inputBackgroundRes(0)
                                     .editable(false)
                                     .build()
+                            )
+                    )
+                    .child(
+                        Row.create(c)
+                            .widthDip(130f)
+                            .heightDip(30f)
+                            .child(
+                                Text.create(c)
+                                    .text("DELETE")
+                                    .textSizeSp(20f)
+                                    .textColor(Background.color)
+                                    .clickHandler(ActivityItem.onDeleteActivityClicked(c, activity.activityId))
                             )
                     )
                     .child(
@@ -87,6 +95,11 @@ object ActivityItemSpec {
         return builder.build()
     }
 
+
+    @OnEvent(ClickEvent::class)
+    fun onDeleteActivityClicked(c: ComponentContext, @Param activityId: String) {
+        ActivityItem.dispatchDeleteActivityEvent(ActivityItem.getDeleteActivityEventHandler(c),activityId)
+    }
 }
 
 
