@@ -1,6 +1,8 @@
 package com.example.hangboard.components.workout
 
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.text.InputType
 import android.text.Layout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hangboard.components.style.TomorrowNightStyle.*
@@ -16,9 +18,7 @@ import com.facebook.litho.sections.common.DataDiffSection
 import com.facebook.litho.sections.common.RenderEvent
 import com.facebook.litho.sections.widget.NotAnimatedItemAnimator
 import com.facebook.litho.sections.widget.RecyclerCollectionComponent
-import com.facebook.litho.widget.ComponentRenderInfo
-import com.facebook.litho.widget.RenderInfo
-import com.facebook.litho.widget.Text
+import com.facebook.litho.widget.*
 import com.facebook.yoga.YogaAlign
 import com.facebook.yoga.YogaEdge
 import io.paperdb.Paper
@@ -38,6 +38,25 @@ object ExpandableWorkoutItemSpec {
     @OnCreateLayout
     fun onCreateLayout(c: ComponentContext, @State workout: Workout): Component {
         return Column.create(c)
+            .child(
+                Row.create(c)
+                    .widthDip(250f)
+                    .heightDip(30f)
+                    .child(
+                        TextInput.create(c)
+                            .initialText(workout.name)
+                            .textColorStateList(ColorStateList.valueOf(Blue.color))
+                            .textSizeSp(20f)
+                            .inputType(InputType.TYPE_CLASS_NUMBER)
+                            .inputBackgroundRes(0)
+                            .editable(true)
+//                            .inputFilter(ExerciseItemSpec.lenFilter)
+//                            .hint(ExerciseItemSpec.HINT)
+                            .hintColorStateList(ColorStateList.valueOf(Blue.color))
+                            .textChangedEventHandler(ExpandableWorkoutItem.onChangeExerciseRepetitions(c))
+                            .build()
+                    )
+            )
             .child(
                 RecyclerCollectionComponent.create(c)
                     .flexGrow(1f)
@@ -162,6 +181,18 @@ object ExpandableWorkoutItemSpec {
         )
         initialWorkout.activities = activitiesListToUpdate
         workout.set(initialWorkout)
+    }
+
+
+    @OnEvent(TextChangedEvent::class)
+    fun onChangeExerciseRepetitions(c: ComponentContext, @FromEvent text: String, @State workout: Workout) {
+        workout.name = text
+        ExpandableWorkoutItem.changeWorkout(c, workout)
+    }
+
+    @OnUpdateState
+    fun changeWorkout(workout: StateValue<Workout>, @Param value: Workout) {
+        workout.set(value)
     }
 
 }

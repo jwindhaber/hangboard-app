@@ -1,4 +1,4 @@
 package com.example.hangboard.workout.dto
 
 
-data class Workout(val name: String, var activities: List<Activity>)
+data class Workout(var name: String, var activities: List<Activity>)
