@@ -21,6 +21,7 @@ import com.facebook.litho.widget.RenderInfo
 import com.facebook.litho.widget.Text
 import com.facebook.yoga.YogaAlign
 import com.facebook.yoga.YogaEdge
+import io.paperdb.Paper
 
 
 @LayoutSpec
@@ -48,7 +49,7 @@ object ExpandableWorkoutItemSpec {
                             .renderEventHandler(ExpandableWorkoutItem.onRender(c))
                     )
                     .paddingDip(YogaEdge.TOP, 8f)
-                )
+            )
             .child(
                 Row.create(c)
                     .backgroundColor(Color.LTGRAY)
@@ -63,19 +64,19 @@ object ExpandableWorkoutItemSpec {
                             .textAlignment(Layout.Alignment.ALIGN_CENTER)
                             .backgroundColor(Selection.color)
                             .textColor(Green.color)
-                            .clickHandler(ExpandableWorkoutItem.onClick(c, true))
+                            .clickHandler(ExpandableWorkoutItem.onClickAddActivity(c))
                     )
                     .child(
                         Text.create(c)
                             .paddingDip(YogaEdge.ALL, 10f)
-                            .text("REMOVE")
+                            .text("SAVE")
                             .textSizeSp(20f)
                             .flexGrow(1f)
                             .alignSelf(YogaAlign.CENTER)
                             .textAlignment(Layout.Alignment.ALIGN_CENTER)
                             .backgroundColor(Selection.color)
                             .textColor(Red.color)
-                            .clickHandler(ExpandableWorkoutItem.onClick(c, false))
+                            .clickHandler(ExpandableWorkoutItem.onClickSaveWorkout(c))
                     )
             )
 
@@ -115,8 +116,14 @@ object ExpandableWorkoutItemSpec {
     }
 
     @OnEvent(ClickEvent::class)
-    fun onClick(c: ComponentContext, @State workout: Workout, @Param adding: Boolean) {
-        ExpandableWorkoutItem.onUpdateListSync(c, adding)
+    fun onClickSaveWorkout(c: ComponentContext, @State workout: Workout) {
+       //TODO Extract to a Proper Repo layer
+        Paper.book("workouts").write(workout.name, workout)
+    }
+
+    @OnEvent(ClickEvent::class)
+    fun onClickAddActivity(c: ComponentContext, @State workout: Workout) {
+        ExpandableWorkoutItem.onUpdateListSync(c)
     }
 
     @OnUpdateState
@@ -133,9 +140,8 @@ object ExpandableWorkoutItemSpec {
     }
 
 
-
     @OnUpdateState
-    fun onUpdateList(workout: StateValue<Workout>, @Param adding: Boolean) {
+    fun onUpdateList(workout: StateValue<Workout>) {
 
         //Null guard
         val initialWorkout = workout.get() ?: return
@@ -143,23 +149,17 @@ object ExpandableWorkoutItemSpec {
         val activitiesListToUpdate = ArrayList(initialWorkout.activities)
         val defaultWorkUnit = WorkUnit("defaultWorkUnit", 7, 3)
 
-        if (adding) {
-            activitiesListToUpdate.add(
-                Activity(
-                    name = "bla",
-                    rest = 240,
-                    exercises = listOf(
-                        Exercise("first", 180, 7, 35, defaultWorkUnit),
-                        Exercise("first", 180, 6, 35, defaultWorkUnit),
-                        Exercise("first", 180, 5, 35, defaultWorkUnit)
-                    )
+        activitiesListToUpdate.add(
+            Activity(
+                name = "bla",
+                rest = 240,
+                exercises = listOf(
+                    Exercise("first", 180, 7, 35, defaultWorkUnit),
+                    Exercise("first", 180, 6, 35, defaultWorkUnit),
+                    Exercise("first", 180, 5, 35, defaultWorkUnit)
                 )
             )
-        } else {
-            if(activitiesListToUpdate.size > 0){
-                activitiesListToUpdate.removeAt(activitiesListToUpdate.size-1)
-            }
-        }
+        )
         initialWorkout.activities = activitiesListToUpdate
         workout.set(initialWorkout)
     }

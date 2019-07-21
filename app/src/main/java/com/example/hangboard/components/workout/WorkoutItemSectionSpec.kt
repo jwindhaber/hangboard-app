@@ -43,25 +43,4 @@ object WorkoutItemSectionSpec {
             .build()
     }
 
-
-
-//    @OnEvent(ClickEvent::class)
-//    fun onClickHangboard(c: ComponentContext, @FromEvent view: View, @Prop listener: HomeComponentClickListener) {
-//        Log.i(HomeComponentSpec.TAG, "Hangboard clicked")
-//        listener.onHangboardClick()
-//    }
-//
-//    @OnEvent(ClickEvent::class)
-//    fun onClickHistory(c: ComponentContext, @FromEvent view: View, @Prop listener: HomeComponentClickListener) {
-//        Log.i(HomeComponentSpec.TAG, "History clicked")
-//        listener.onHistoryClick()
-//    }
-//
-//
-//    interface HomeComponentClickListener {
-//        fun onHangboardClick()
-//        fun onHistoryClick()
-//    }
-
-
 }

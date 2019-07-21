@@ -23,7 +23,7 @@ object HistoryListItemSpec {
         return Column.create(c)
             .paddingDip(YogaEdge.ALL, 16f)
             .backgroundColor(color)
-            .clickHandler(HistoryListItem.onClickHistory(c))
+            .clickHandler(HistoryListItem.onClickHistory(c, title))
             .child(
                 Text.create(c)
                     .text(title)
@@ -41,14 +41,14 @@ object HistoryListItemSpec {
 
 
     @OnEvent(ClickEvent::class)
-    fun onClickHistory(c: ComponentContext, @FromEvent view: View, @Prop listener: HistoryListItemClickListener) {
+    fun onClickHistory(c: ComponentContext, @FromEvent view: View, @Prop listener: HistoryListItemClickListener, @Param workoutId: String) {
         Log.i(TAG, "History clicked")
-        listener.onHistoryListItemClick()
+        listener.onHistoryListItemClick(workoutId)
     }
 
 
     interface HistoryListItemClickListener {
-        fun onHistoryListItemClick()
+        fun onHistoryListItemClick(workoutId: String)
     }
 
 }

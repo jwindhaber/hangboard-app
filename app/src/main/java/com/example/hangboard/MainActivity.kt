@@ -6,15 +6,18 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.example.hangboard.components.HomeComponent
 import com.example.hangboard.components.HomeComponentSpec
+import com.example.hangboard.components.history.HistoryListItemSpec
 import com.example.hangboard.components.history.HistoryListSection
 import com.example.hangboard.components.timer.TimerItem
 import com.example.hangboard.components.workout.ExpandableWorkoutItem
 import com.example.hangboard.timer.HangboardTimer
+import com.example.hangboard.workout.dto.Workout
 import com.example.hangboard.workout.util.WorkoutProvider
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
 import com.facebook.litho.sections.widget.RecyclerCollectionComponent
+import io.paperdb.Paper
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,32 +35,16 @@ class MainActivity : AppCompatActivity() {
         val context = ComponentContext(this)
 
 
-//        val gifSelectHandler = EventHandler(HasEventDispatcher {
-//
-//            EventDispatcher { eventHandler, eventState ->
-//                val event = eventState as DeleteActivityEvent
-//
-//            }
-//
-//        }, 123456, null)
+        val historyClickedListener = object : HistoryListItemSpec.HistoryListItemClickListener {
+            override fun onHistoryListItemClick(workoutId: String) {
+                //TODO extract to proper repo layer
+                val workout = Paper.book("workouts").read<Workout>(workoutId)
+                val createWorkoutItem = ExpandableWorkoutItem.create(context).initialWorkout(workout).build()
+                root?.setComponentAsync(createWorkoutItem)
+            }
+        }
 
 
-
-
-
-
-
-//        val createWorkoutItem = RecyclerCollectionComponent.create(context)
-//            .disablePTR(true)
-//            .section(WorkoutItemSection.create(SectionContext(context)).workout(WorkoutProvider.getWorkout()).build())
-//            .build()
-//        val beepList = RecyclerCollectionComponent.create(context)
-//            .disablePTR(true)
-//            .section(BeepList.create(SectionContext(context)).build())
-//            .build()
-//
-//
-//        val customBeep = CustomBeep.create(context).build()
 
         val createWorkoutItem = ExpandableWorkoutItem.create(context).initialWorkout(WorkoutProvider.getWorkout()).build()
 
@@ -66,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
         val historyComponent = RecyclerCollectionComponent.create(context)
             .disablePTR(true)
-            .section(HistoryListSection.create(SectionContext(context)).build())
+            .section(HistoryListSection.create(SectionContext(context)).historyClickedListener(historyClickedListener).build())
             .build()
 
 
