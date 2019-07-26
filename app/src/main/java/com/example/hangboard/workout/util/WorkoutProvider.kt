@@ -1,9 +1,9 @@
 package com.example.hangboard.workout.util
 
-import com.example.hangboard.workout.dto.Activity
-import com.example.hangboard.workout.dto.Exercise
-import com.example.hangboard.workout.dto.WorkUnit
-import com.example.hangboard.workout.dto.Workout
+import com.example.hangboard.dto.Activity
+import com.example.hangboard.dto.Exercise
+import com.example.hangboard.dto.WorkUnit
+import com.example.hangboard.dto.Workout
 
 object WorkoutProvider {
 
@@ -19,7 +19,7 @@ object WorkoutProvider {
             listOf(
                 Activity(
                     name = "Edge",
-                    rest= 240,
+                    rest = 240,
                     exercises = listOf(
                         Exercise("first", 10, 2, 25, defaultWorkUnit),
                         Exercise("first", 10, 2, 30, defaultWorkUnit),
@@ -28,7 +28,7 @@ object WorkoutProvider {
                 ),
                 Activity(
                     name = "One Hand Edge",
-                    rest= 240,
+                    rest = 240,
                     exercises = listOf(
                         Exercise("first", 180, 7, 25, defaultWorkUnit),
                         Exercise("first", 180, 6, 30, defaultWorkUnit),
@@ -37,7 +37,7 @@ object WorkoutProvider {
                 ),
                 Activity(
                     name = "Pull UP One Hand",
-                    rest= 240,
+                    rest = 240,
                     exercises = listOf(
                         Exercise("first", 180, 7, 25, pullUpWorkUnit),
                         Exercise("first", 180, 6, 30, pullUpWorkUnit),

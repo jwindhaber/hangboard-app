@@ -1,4 +1,4 @@
-package com.example.hangboard.workout.dto
+package com.example.hangboard.dto
 
 
 

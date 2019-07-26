@@ -1,10 +1,10 @@
 package com.example.hangboard.timer
 
 import com.example.hangboard.components.timer.TimerState
+import com.example.hangboard.dto.Workout
+import com.example.hangboard.dto.definition.FragmentIdentifier
+import com.example.hangboard.dto.definition.FragmentIdentifier.*
 import com.example.hangboard.timer.util.HanboardTimerUtils
-import com.example.hangboard.workout.definition.FragmentIdentifier
-import com.example.hangboard.workout.definition.FragmentIdentifier.*
-import com.example.hangboard.workout.dto.Workout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job

@@ -1,4 +1,4 @@
-package com.example.hangboard.workout.definition
+package com.example.hangboard.dto.definition
 
 enum class Feeling {
     BAD,

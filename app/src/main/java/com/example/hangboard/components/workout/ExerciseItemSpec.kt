@@ -6,7 +6,7 @@ import android.text.InputType
 import android.text.Layout
 import android.widget.Toast
 import com.example.hangboard.components.style.TomorrowNightStyle.*
-import com.example.hangboard.workout.dto.Exercise
+import com.example.hangboard.dto.Exercise
 import com.facebook.litho.*
 import com.facebook.litho.annotations.*
 import com.facebook.litho.widget.Text

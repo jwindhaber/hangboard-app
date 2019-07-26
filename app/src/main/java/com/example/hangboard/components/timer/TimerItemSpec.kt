@@ -3,8 +3,8 @@ package com.example.hangboard.components.timer
 import android.graphics.Color
 import android.text.Layout
 import com.example.hangboard.components.style.TomorrowNightStyle.*
+import com.example.hangboard.dto.definition.FragmentIdentifier
 import com.example.hangboard.timer.HangboardTimer
-import com.example.hangboard.workout.definition.FragmentIdentifier
 import com.example.hangboard.workout.util.TimeFormatter.getFormattedTime
 import com.facebook.litho.*
 import com.facebook.litho.annotations.*

@@ -6,7 +6,7 @@ import android.text.InputType
 import com.example.hangboard.components.style.TomorrowNightStyle.Background
 import com.example.hangboard.components.style.TomorrowNightStyle.Foreground
 import com.example.hangboard.components.workout.events.DeleteActivityEvent
-import com.example.hangboard.workout.dto.Activity
+import com.example.hangboard.dto.Activity
 import com.facebook.litho.*
 import com.facebook.litho.annotations.*
 import com.facebook.litho.widget.Text
