@@ -5,7 +5,7 @@ import android.media.ToneGenerator
 import android.os.Handler
 import android.os.SystemClock
 import android.util.Log
-import com.example.hangboard.dto.Activity
+import com.example.hangboard.persistence.Activity
 
 object HanboardTimerUtils {
 

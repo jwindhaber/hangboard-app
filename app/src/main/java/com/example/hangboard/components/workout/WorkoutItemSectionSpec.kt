@@ -1,7 +1,7 @@
 package com.example.hangboard.components.workout
 
-import com.example.hangboard.dto.Activity
-import com.example.hangboard.dto.Workout
+import com.example.hangboard.persistence.Activity
+import com.example.hangboard.persistence.Workout
 import com.facebook.litho.annotations.FromEvent
 import com.facebook.litho.annotations.OnEvent
 import com.facebook.litho.annotations.Prop

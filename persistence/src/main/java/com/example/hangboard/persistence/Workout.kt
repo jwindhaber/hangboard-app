@@ -1,4 +1,4 @@
-package com.example.hangboard.dto
+package com.example.hangboard.persistence
 
 
 data class Workout(var name: String, var activities: List<Activity>)

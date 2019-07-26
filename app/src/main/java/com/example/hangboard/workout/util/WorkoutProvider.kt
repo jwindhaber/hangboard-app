@@ -1,9 +1,9 @@
 package com.example.hangboard.workout.util
 
-import com.example.hangboard.dto.Activity
-import com.example.hangboard.dto.Exercise
-import com.example.hangboard.dto.WorkUnit
-import com.example.hangboard.dto.Workout
+import com.example.hangboard.persistence.Activity
+import com.example.hangboard.persistence.Exercise
+import com.example.hangboard.persistence.WorkUnit
+import com.example.hangboard.persistence.Workout
 
 object WorkoutProvider {
 
