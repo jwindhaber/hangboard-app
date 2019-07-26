@@ -2,13 +2,13 @@ package com.example.hangboard.components.history
 
 import com.example.hangboard.components.style.TomorrowNightStyle.Background
 import com.example.hangboard.components.style.TomorrowNightStyle.CurrentLine
+import com.example.hangboard.persistence.repository.WorkoutTemplateRepository
 import com.facebook.litho.annotations.Prop
 import com.facebook.litho.sections.Children
 import com.facebook.litho.sections.SectionContext
 import com.facebook.litho.sections.annotations.GroupSectionSpec
 import com.facebook.litho.sections.annotations.OnCreateChildren
 import com.facebook.litho.sections.common.SingleComponentSection
-import io.paperdb.Paper
 import java.util.*
 
 
@@ -19,8 +19,7 @@ object HistoryListSectionSpec {
     fun onCreateChildren(c: SectionContext, @Prop historyClickedListener: HistoryListItemSpec.HistoryListItemClickListener): Children {
         val builder = Children.create()
 
-        val workoutKeys = Paper.book("workouts").allKeys
-
+        val workoutKeys = WorkoutTemplateRepository.getAllWorkoutNames()
 
         workoutKeys.forEachIndexed { index, key ->
             builder.child(

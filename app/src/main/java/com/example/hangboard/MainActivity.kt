@@ -10,14 +10,13 @@ import com.example.hangboard.components.history.HistoryListItemSpec
 import com.example.hangboard.components.history.HistoryListSection
 import com.example.hangboard.components.timer.TimerItem
 import com.example.hangboard.components.workout.ExpandableWorkoutItem
-import com.example.hangboard.persistence.dto.Workout
+import com.example.hangboard.persistence.repository.WorkoutTemplateRepository
 import com.example.hangboard.timer.HangboardTimer
 import com.example.hangboard.workout.util.WorkoutProvider
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
 import com.facebook.litho.sections.widget.RecyclerCollectionComponent
-import io.paperdb.Paper
 
 
 class MainActivity : AppCompatActivity() {
@@ -37,9 +36,8 @@ class MainActivity : AppCompatActivity() {
 
         val historyClickedListener = object : HistoryListItemSpec.HistoryListItemClickListener {
             override fun onHistoryListItemClick(workoutId: String) {
-                //TODO extract to proper repo layer
-                val workout = Paper.book("workouts").read<Workout>(workoutId)
-                val createWorkoutItem = ExpandableWorkoutItem.create(context).initialWorkout(workout).build()
+                val workout = WorkoutTemplateRepository.findWorkoutByWorkoutId(workoutId)
+                val createWorkoutItem = workout?.let { ExpandableWorkoutItem.create(context).initialWorkout(it).build() }
                 root?.setComponentAsync(createWorkoutItem)
             }
         }

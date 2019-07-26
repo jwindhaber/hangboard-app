@@ -11,6 +11,7 @@ import com.example.hangboard.persistence.dto.Activity
 import com.example.hangboard.persistence.dto.Exercise
 import com.example.hangboard.persistence.dto.WorkUnit
 import com.example.hangboard.persistence.dto.Workout
+import com.example.hangboard.persistence.repository.WorkoutTemplateRepository.saveWorkout
 import com.facebook.litho.*
 import com.facebook.litho.annotations.*
 import com.facebook.litho.sections.SectionContext
@@ -21,7 +22,6 @@ import com.facebook.litho.sections.widget.RecyclerCollectionComponent
 import com.facebook.litho.widget.*
 import com.facebook.yoga.YogaAlign
 import com.facebook.yoga.YogaEdge
-import io.paperdb.Paper
 
 
 @LayoutSpec
@@ -136,8 +136,7 @@ object ExpandableWorkoutItemSpec {
 
     @OnEvent(ClickEvent::class)
     fun onClickSaveWorkout(c: ComponentContext, @State workout: Workout) {
-       //TODO Extract to a Proper Repo layer
-        Paper.book("workouts").write(workout.name, workout)
+        saveWorkout(workout)
     }
 
     @OnEvent(ClickEvent::class)
