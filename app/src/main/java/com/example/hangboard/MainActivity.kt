@@ -10,7 +10,7 @@ import com.example.hangboard.components.history.HistoryListItemSpec
 import com.example.hangboard.components.history.HistoryListSection
 import com.example.hangboard.components.timer.TimerItem
 import com.example.hangboard.components.workout.ExpandableWorkoutItem
-import com.example.hangboard.persistence.Workout
+import com.example.hangboard.persistence.dto.Workout
 import com.example.hangboard.timer.HangboardTimer
 import com.example.hangboard.workout.util.WorkoutProvider
 import com.facebook.litho.ComponentContext

@@ -1,1 +1,1 @@
-include ':app', ':persistence', ':dto'
+include ':app', ':persistence'

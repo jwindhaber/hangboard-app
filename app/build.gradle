@@ -41,7 +41,6 @@ android {
 
 dependencies {
 
-    implementation project(':dto')
     implementation project(':persistence')
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])

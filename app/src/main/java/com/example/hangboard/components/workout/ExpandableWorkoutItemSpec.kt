@@ -7,10 +7,10 @@ import android.text.Layout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hangboard.components.style.TomorrowNightStyle.*
 import com.example.hangboard.components.workout.events.DeleteActivityEvent
-import com.example.hangboard.persistence.Activity
-import com.example.hangboard.persistence.Exercise
-import com.example.hangboard.persistence.WorkUnit
-import com.example.hangboard.persistence.Workout
+import com.example.hangboard.persistence.dto.Activity
+import com.example.hangboard.persistence.dto.Exercise
+import com.example.hangboard.persistence.dto.WorkUnit
+import com.example.hangboard.persistence.dto.Workout
 import com.facebook.litho.*
 import com.facebook.litho.annotations.*
 import com.facebook.litho.sections.SectionContext

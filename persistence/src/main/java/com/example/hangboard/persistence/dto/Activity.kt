@@ -1,4 +1,4 @@
-package com.example.hangboard.persistence
+package com.example.hangboard.persistence.dto
 
 import java.util.*
 

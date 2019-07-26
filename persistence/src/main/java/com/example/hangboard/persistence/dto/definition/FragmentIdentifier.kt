@@ -1,4 +1,4 @@
-package com.example.hangboard.persistence.definition
+package com.example.hangboard.persistence.dto.definition
 
 enum class FragmentIdentifier(val text: String, val color: String) {
     REST("REST","#f0c674"),
