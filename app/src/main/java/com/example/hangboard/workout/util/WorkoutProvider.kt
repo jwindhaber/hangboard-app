@@ -20,7 +20,7 @@ object WorkoutProvider {
                 Activity(
                     name = "Edge",
                     rest = 240,
-                    exercises = listOf(
+                    exercises = mutableListOf(
                         Exercise("first", 10, 2, 25, defaultWorkUnit),
                         Exercise("first", 10, 2, 30, defaultWorkUnit),
                         Exercise("first", 180, 5, 35, defaultWorkUnit)
@@ -29,7 +29,7 @@ object WorkoutProvider {
                 Activity(
                     name = "One Hand Edge",
                     rest = 240,
-                    exercises = listOf(
+                    exercises = mutableListOf(
                         Exercise("first", 180, 7, 25, defaultWorkUnit),
                         Exercise("first", 180, 6, 30, defaultWorkUnit),
                         Exercise("first", 180, 5, 35, defaultWorkUnit)
@@ -38,7 +38,7 @@ object WorkoutProvider {
                 Activity(
                     name = "Pull UP One Hand",
                     rest = 240,
-                    exercises = listOf(
+                    exercises = mutableListOf(
                         Exercise("first", 180, 7, 25, pullUpWorkUnit),
                         Exercise("first", 180, 6, 30, pullUpWorkUnit),
                         Exercise("first", 180, 5, 35, pullUpWorkUnit)

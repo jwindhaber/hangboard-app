@@ -11,8 +11,20 @@ object WorkoutHistoryRepository {
     private const val WORKOUT_HISTORY_KEY = "workoutHistory"
 
     fun getAllHistorizedWorkoutNames(): List<String> {
-        //TODO check null
         return Paper.book(WORKOUT_HISTORY_KEY).allKeys
+    }
+
+    fun getAllHistorizedWorkouts(): List<Workout> {
+        val keys = Paper.book(WORKOUT_HISTORY_KEY).allKeys
+        val workouts = mutableListOf<Workout>()
+
+        keys.forEach{key ->
+            val workout = Paper.book(WORKOUT_HISTORY_KEY).read<Workout>(key)
+            workout?.let { workouts.add(workout) }
+        }
+        workouts.sortBy { it.creationDate }
+
+        return workouts
     }
 
     fun findHistorizedWorkoutByWorkoutId(workoutId: String): Workout? {

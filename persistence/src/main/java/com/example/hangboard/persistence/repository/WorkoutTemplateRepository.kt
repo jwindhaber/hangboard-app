@@ -10,9 +10,20 @@ object WorkoutTemplateRepository {
 
     private const val WORKOUT_TEMPLATE_KEY = "workoutTemplate"
 
-    fun getAllWorkoutNames(): List<String> {
-        //TODO check null
+    fun getAllWorkoutTemplateNames(): List<String> {
         return Paper.book(WORKOUT_TEMPLATE_KEY).allKeys
+    }
+
+    fun getAllWorkoutTemplates(): List<Workout> {
+        val keys = Paper.book(WORKOUT_TEMPLATE_KEY).allKeys
+        val workouts = mutableListOf<Workout>()
+
+        keys.forEach{key ->
+            val workout = Paper.book(WORKOUT_TEMPLATE_KEY).read<Workout>(key)
+            workout?.let { workouts.add(workout) }
+        }
+
+        return workouts
     }
 
     fun findWorkoutByWorkoutId(workoutId: String): Workout? {

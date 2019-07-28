@@ -127,7 +127,7 @@ object ExpandableWorkoutItemSpec {
         return ComponentRenderInfo.create()
             .component(
                 ActivityItem.create(c)
-                    .activity(model)
+                    .initialActivity(model)
                     .deleteActivityEventHandler(deleteActivityHandler)
                     .build()
             )
@@ -171,7 +171,7 @@ object ExpandableWorkoutItemSpec {
             Activity(
                 name = "bla",
                 rest = 240,
-                exercises = listOf(
+                exercises = mutableListOf(
                     Exercise("first", 180, 7, 35, defaultWorkUnit),
                     Exercise("first", 180, 6, 35, defaultWorkUnit),
                     Exercise("first", 180, 5, 35, defaultWorkUnit)

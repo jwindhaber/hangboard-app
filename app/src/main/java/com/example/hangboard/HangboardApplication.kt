@@ -1,8 +1,8 @@
 package com.example.hangboard
 
 import android.app.Application
+import com.example.hangboard.config.persistence.PersistenceConfiguration
 import com.facebook.soloader.SoLoader
-import io.paperdb.Paper
 
 class HangboardApplication : Application() {
 
@@ -13,6 +13,6 @@ class HangboardApplication : Application() {
         SoLoader.init(this, false)
 
         //loader for paper
-        Paper.init(applicationContext);
+        PersistenceConfiguration.initPaper(applicationContext)
     }
 }

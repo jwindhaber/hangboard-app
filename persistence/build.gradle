@@ -38,6 +38,7 @@ dependencies {
     //Storage Library -> maybe use the rx version later on
     implementation 'com.github.pilgr:Paper:2.6'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    testImplementation'org.junit.jupiter:junit-jupiter:5.5.1'
 }
 repositories {
     mavenCentral()

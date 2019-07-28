@@ -37,7 +37,7 @@ object WorkoutItemSectionSpec {
         return ComponentRenderInfo.create()
             .component(
                 ActivityItem.create(c)
-                    .activity(model)
+//                    .activity(model)
                     .build()
             )
             .build()

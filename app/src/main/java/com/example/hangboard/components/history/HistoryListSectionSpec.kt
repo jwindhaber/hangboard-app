@@ -19,7 +19,7 @@ object HistoryListSectionSpec {
     fun onCreateChildren(c: SectionContext, @Prop historyClickedListener: HistoryListItemSpec.HistoryListItemClickListener): Children {
         val builder = Children.create()
 
-        val workoutKeys = WorkoutTemplateRepository.getAllWorkoutNames()
+        val workoutKeys = WorkoutTemplateRepository.getAllWorkoutTemplateNames()
 
         workoutKeys.forEachIndexed { index, key ->
             builder.child(

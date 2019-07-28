@@ -1,12 +1,11 @@
 package com.example.hangboard.components.workout
 
-import android.R.attr.maxLength
-import android.text.InputFilter
 import android.text.InputType
-import com.example.hangboard.components.style.TomorrowNightStyle.Background
-import com.example.hangboard.components.style.TomorrowNightStyle.Foreground
+import com.example.hangboard.components.style.TomorrowNightStyle.*
 import com.example.hangboard.components.workout.events.DeleteActivityEvent
 import com.example.hangboard.persistence.dto.Activity
+import com.example.hangboard.persistence.dto.Exercise
+import com.example.hangboard.persistence.dto.WorkUnit
 import com.facebook.litho.*
 import com.facebook.litho.annotations.*
 import com.facebook.litho.widget.Text
@@ -19,13 +18,15 @@ object ActivityItemSpec {
 
     private const val TAG = "ActivityItemSpec"
 
+    @OnCreateInitialState
+    fun onCreateInitialState(c: ComponentContext, activity: StateValue<Activity>, @Prop initialActivity: Activity) {
+        activity.set(initialActivity)
+    }
+
     @OnCreateLayout
-    fun onCreateLayout(c: ComponentContext, @Prop activity: Activity): Component {
-        val lenFilter = InputFilter.LengthFilter(maxLength)
+    fun onCreateLayout(c: ComponentContext, @State activity: Activity): Component {
 
-
-
-        var builder = Column.create(c)
+        val builder = Column.create(c)
             .child(
                 Row.create(c)
                     .widthDip(420f)
@@ -89,6 +90,26 @@ object ActivityItemSpec {
             builder.child(ExerciseItem.create(c).initialExercise(exercise).editable(true).setNumber(index + 1))
         }
 
+        builder.child(
+            Row.create(c)
+                .widthPercent(100f)
+                .heightDip(40f)
+                .child(
+                    Row.create(c)
+                        .widthPercent(100f)
+                        .heightDip(30f)
+                        .child(
+                            Text.create(c)
+                                .text("ADD Rep")
+                                .textSizeSp(20f)
+                                .textColor(Green.color)
+                                .clickHandler(ActivityItem.onAddExerciseToActivityClicked(c))
+                        )
+
+                )
+                .alignItems(YogaAlign.CENTER)
+        )
+
 
         builder.alignItems(YogaAlign.CENTER)
 
@@ -98,7 +119,20 @@ object ActivityItemSpec {
 
     @OnEvent(ClickEvent::class)
     fun onDeleteActivityClicked(c: ComponentContext, @Param activityId: String) {
-        ActivityItem.dispatchDeleteActivityEvent(ActivityItem.getDeleteActivityEventHandler(c),activityId)
+        ActivityItem.dispatchDeleteActivityEvent(ActivityItem.getDeleteActivityEventHandler(c), activityId)
+    }
+
+    @OnEvent(ClickEvent::class)
+    fun onAddExerciseToActivityClicked(c: ComponentContext) {
+        ActivityItem.addExerciseToActivity(c)
+    }
+
+
+    @OnUpdateState
+    fun addExerciseToActivity(activity: StateValue<Activity>) {
+        val activityToChange = activity.get()
+        activityToChange?.exercises?.add(Exercise("some", 300, 7, 0, WorkUnit("ddd", 7, 3)))
+        activity.set(activityToChange)
     }
 }
 
